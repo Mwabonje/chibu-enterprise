@@ -68,29 +68,29 @@ export default function ChibuQuote() {
           --green: #35D399;
           font-family: 'Inter', sans-serif;
           color: var(--text);
-          padding: 6px;
+          padding: 0;
         }
         .page-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         .page-title { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; }
         .page-sub { color: var(--dim); font-size: 12.5px; margin-top: 3px; }
-        .head-actions { display: flex; gap: 10px; }
+        .head-actions { display: flex; gap: 10px; flex-wrap: wrap; }
         .btn { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; padding: 9px 15px; border-radius: 8px; cursor: pointer; border: 1px solid var(--border); }
         .btn-ghost { background: var(--panel); color: var(--text); }
         .btn-ghost:hover { border-color: var(--amber); }
         .btn-primary { background: var(--amber); color: #14181D; border: none; }
 
-        .layout { display: grid; grid-template-columns: 1fr 1.15fr; gap: 18px; align-items: start; }
+        .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 18px; align-items: start; }
 
         /* ---- Builder (dark control panel) ---- */
-        .builder { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+        .builder { min-width: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
         .block-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--dim); margin-bottom: 9px; font-weight: 600; }
-        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 10px; }
         .field { display: flex; flex-direction: column; gap: 5px; }
         .field label { font-size: 11px; color: var(--dim); }
         .field input, .field textarea {
           background: var(--panel-2); border: 1px solid var(--border); border-radius: 7px;
           padding: 9px 10px; color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif;
-          outline: none;
+          outline: none; width: 100%; min-width: 0;
         }
         .field input:focus, .field textarea:focus { border-color: var(--amber); }
         .divider { height: 1px; background: var(--border); margin: 18px 0; }
@@ -111,7 +111,7 @@ export default function ChibuQuote() {
         .trash-btn { color: var(--dim); cursor: pointer; padding: 4px; border-radius: 6px; }
         .trash-btn:hover { color: #FF7A59; background: rgba(255,122,89,0.1); }
         .desc-input { width: 100%; margin-bottom: 9px; }
-        .qty-price-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .qty-price-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 1fr; gap: 8px; }
         .qty-price-row .field label { font-size: 10px; }
         .line-total { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; align-self: flex-end; padding-bottom: 9px; color: var(--amber); }
 
@@ -125,7 +125,7 @@ export default function ChibuQuote() {
         .notes-field textarea { min-height: 70px; resize: vertical; }
 
         /* ---- Preview (printed quote, light paper) ---- */
-        .preview-shell { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+        .preview-shell { min-width: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
         .preview-tag { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--dim); margin-bottom: 12px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         .preview-tag .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 6px; }
 
@@ -146,7 +146,6 @@ export default function ChibuQuote() {
         .paper-info-label { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.1em; color: #8C8375; margin-bottom: 4px; font-weight: 600; }
         .paper-info-name { font-weight: 600; font-size: 13.5px; }
 
-        .paper-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
         .paper-table th {
           text-align: left; font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.08em;
           color: #8C8375; font-weight: 600; padding-bottom: 8px; border-bottom: 1.5px solid #23201B;
@@ -166,14 +165,20 @@ export default function ChibuQuote() {
         .paper-foot { margin-top: 22px; text-align: center; font-size: 10.5px; color: #8C8375; letter-spacing: 0.03em; }
 
         @media (max-width: 980px) {
-          .layout { grid-template-columns: 1fr; }
-          .field-row, .qty-price-row { grid-template-columns: 1fr 1fr; }
+          .layout { grid-template-columns: minmax(0, 1fr); }
+          .field-row, .qty-price-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
         }
         @media (max-width: 560px) {
+          .field-row { grid-template-columns: minmax(0, 1fr); }
+          .qty-price-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
           .paper { padding: 22px 18px; }
           .paper-head { flex-direction: column; gap: 12px; }
           .paper-meta { text-align: left; }
+          .paper-info-row { flex-direction: column; gap: 14px; }
+          .paper-info-block { text-align: left !important; }
         }
+        .paper-table-wrapper { width: 100%; overflow-x: auto; margin-bottom: 6px; }
+        .paper-table { width: 100%; border-collapse: collapse; min-width: 480px; }
       `}</style>
 
       <div className="page-head">
@@ -311,34 +316,36 @@ export default function ChibuQuote() {
               </div>
             </div>
 
-            <table className="paper-table">
-              <thead>
-                <tr>
-                  <th style={{ width: "52%" }}>Description</th>
-                  <th className="num">Qty</th>
-                  <th className="num">Unit Price</th>
-                  <th className="num">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((it) => {
-                  const meta = serviceMeta(it.service);
-                  return (
-                    <tr key={it.id}>
-                      <td>
-                        <div className="paper-item-service" style={{ color: meta.color }}>
-                          <span className="sw" style={{ background: meta.color }} /> {it.service}
-                        </div>
-                        {it.desc || "—"}
-                      </td>
-                      <td className="num mono">{it.qty}</td>
-                      <td className="num mono">{money(Number(it.price) || 0)}</td>
-                      <td className="num mono">{money((Number(it.qty) || 0) * (Number(it.price) || 0))}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="paper-table-wrapper">
+              <table className="paper-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: "52%" }}>Description</th>
+                    <th className="num">Qty</th>
+                    <th className="num">Unit Price</th>
+                    <th className="num">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((it) => {
+                    const meta = serviceMeta(it.service);
+                    return (
+                      <tr key={it.id}>
+                        <td>
+                          <div className="paper-item-service" style={{ color: meta.color }}>
+                            <span className="sw" style={{ background: meta.color }} /> {it.service}
+                          </div>
+                          {it.desc || "—"}
+                        </td>
+                        <td className="num mono">{it.qty}</td>
+                        <td className="num mono">{money(Number(it.price) || 0)}</td>
+                        <td className="num mono">{money((Number(it.qty) || 0) * (Number(it.price) || 0))}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
             <div className="paper-totals">
               <div className="paper-totals-row"><span>Subtotal</span><span className="mono">{money(subtotal)}</span></div>

@@ -101,7 +101,7 @@ function AppLayout() {
           100% { box-shadow: 0 0 0 0 rgba(53,211,153,0); }
         }
 
-        .main { flex: 1; min-width: 0; padding: 22px 28px 40px; overflow-y: auto; }
+        .main { flex: 1; min-width: 0; padding: 22px 28px 40px; overflow-y: auto; overflow-x: hidden; }
         
         /* Overrides for light-themed old components so they look slightly better */
         .main .bg-white {
@@ -120,7 +120,7 @@ function AppLayout() {
         .greeting { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 600; }
         .greeting-sub { color: var(--dim); font-size: 13px; margin-top: 3px; }
         .menu-btn { display: none; }
-        .topbar-right { display: flex; align-items: center; gap: 10px; }
+        .topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .date-readout {
           font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--dim);
           border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; background: var(--panel);
@@ -131,7 +131,7 @@ function AppLayout() {
           border: none; padding: 9px 14px; border-radius: 8px; cursor: pointer;
         }
 
-        .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 26px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 26px; }
         .stat-tile {
           position: relative; background: var(--panel); border: 1px solid var(--border);
           border-radius: 10px; padding: 18px 18px 16px;
@@ -148,7 +148,7 @@ function AppLayout() {
         .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
         .section-title span.tag { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--dim); font-weight: 400; }
 
-        .services-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 26px; }
+        .services-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 26px; }
         .service-card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; transition: border-color 0.15s, transform 0.15s; }
         .service-card:hover { transform: translateY(-2px); }
         .service-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
@@ -156,7 +156,7 @@ function AppLayout() {
         .service-count { font-family: 'IBM Plex Mono', monospace; font-size: 19px; font-weight: 600; margin-top: 10px; }
         .service-count-label { font-size: 10.5px; color: var(--dim); margin-top: 1px; }
 
-        .lower-grid { display: grid; grid-template-columns: 1.1fr 1.4fr; gap: 16px; align-items: start; }
+        .lower-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr); gap: 16px; align-items: start; }
         .panel-block { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
 
         table { width: 100%; border-collapse: collapse; }
@@ -176,21 +176,33 @@ function AppLayout() {
         }
         .quick-btn:hover { border-color: var(--amber); }
 
+        .table-responsive { width: 100%; overflow-x: auto; }
+        .sidebar-overlay {
+          display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+          z-index: 15; backdrop-filter: blur(2px);
+        }
+
         @media (max-width: 980px) {
-          .stat-grid { grid-template-columns: repeat(2, 1fr); }
-          .services-grid { grid-template-columns: repeat(3, 1fr); }
-          .lower-grid { grid-template-columns: 1fr; }
+          .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .services-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+          .lower-grid { grid-template-columns: minmax(0, 1fr); }
         }
         @media (max-width: 760px) {
+          .sidebar-overlay.open { display: block; }
           .sidebar { position: fixed; z-index: 20; height: 100vh; background: var(--bg); transform: translateX(-100%); transition: transform 0.2s; }
-          .sidebar.open { transform: translateX(0); }
+          .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
           .menu-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: var(--panel); border: 1px solid var(--border); color: var(--text); cursor: pointer; margin-right: 10px; }
-          .services-grid { grid-template-columns: repeat(2, 1fr); }
-          .stat-grid { grid-template-columns: 1fr 1fr; }
-          .main { padding: 18px; }
+          .services-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .stat-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+          .main { padding: 16px; }
+        }
+        @media (max-width: 480px) {
+          .stat-grid { grid-template-columns: minmax(0, 1fr); }
+          .services-grid { grid-template-columns: minmax(0, 1fr); }
         }
       `}</style>
 
+      {navOpen && <div className="sidebar-overlay open" onClick={() => setNavOpen(false)} />}
       <aside className={`sidebar ${navOpen ? "open" : ""}`}>
         <div className="brand">
           <div className="brand-mark">CE</div>

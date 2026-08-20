@@ -66,37 +66,39 @@ export default function ChibuDashboard() {
             <div className="section-title">
               Recent Jobs <span className="tag">LAST 7 ENTRIES</span>
             </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Client</th>
-                  <th>Service</th>
-                  <th>Location</th>
-                  <th>Status</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {jobs.map((j, i) => (
-                  <tr key={i}>
-                    <td>
-                      <div className="client-name">{j.client}</div>
-                      <div className="date-cell">{j.date}</div>
-                    </td>
-                    <td style={{ fontSize: 12.5 }}>{j.service}</td>
-                    <td>
-                      <div className="loc-cell"><MapPin size={11} /> {j.loc}</div>
-                    </td>
-                    <td>
-                      <span className="badge" style={{ color: statusStyle[j.status as StatusType].color, background: statusStyle[j.status as StatusType].bg }}>
-                        {j.status}
-                      </span>
-                    </td>
-                    <td><ChevronRight size={14} color="#8A97A5" /></td>
+            <div className="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Client</th>
+                    <th>Service</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th></th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {jobs.map((j, i) => (
+                    <tr key={i}>
+                      <td>
+                        <div className="client-name">{j.client}</div>
+                        <div className="date-cell">{j.date}</div>
+                      </td>
+                      <td style={{ fontSize: 12.5 }}>{j.service}</td>
+                      <td>
+                        <div className="loc-cell"><MapPin size={11} /> {j.loc}</div>
+                      </td>
+                      <td>
+                        <span className="badge" style={{ color: statusStyle[j.status as StatusType].color, background: statusStyle[j.status as StatusType].bg }}>
+                          {j.status}
+                        </span>
+                      </td>
+                      <td><ChevronRight size={14} color="#8A97A5" /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
     </>
