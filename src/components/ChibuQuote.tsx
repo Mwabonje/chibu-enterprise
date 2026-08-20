@@ -167,8 +167,8 @@ export default function ChibuQuote() {
         .paper-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #23201B; padding-bottom: 16px; margin-bottom: 18px; }
         .paper-brand { display: flex; align-items: center; gap: 10px; }
         .paper-mark { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg,#FFB020,#FF7A59); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; color:#20140A; font-size:15px; }
-        .paper-company { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.01em; }
-        .paper-company-sub { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6255; margin-top: 2px; }
+        .paper-company { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.01em; width: max-content; }
+        .paper-company-sub { display: flex; justify-content: space-between; font-size: 8px; text-transform: uppercase; color: #6B6255; margin-top: 3px; font-weight: 600; width: 100%; }
         .paper-meta { text-align: right; font-size: 11.5px; color: #4A443B; line-height: 1.7; }
         .paper-title { font-family: 'Source Serif 4', serif; font-size: 26px; font-weight: 600; letter-spacing: 0.01em; }
 
@@ -321,9 +321,14 @@ export default function ChibuQuote() {
             <div className="paper-head">
               <div className="paper-brand">
                 <div className="paper-mark">CE</div>
-                <div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <div className="paper-company">CHIBU ENTERPRISES</div>
-                  <div className="paper-company-sub">Security &amp; Power Systems</div>
+                  <div className="paper-company-sub">
+                    <span>Security</span>
+                    <span>&amp;</span>
+                    <span>Power</span>
+                    <span>Systems</span>
+                  </div>
                 </div>
               </div>
               <div className="paper-meta">

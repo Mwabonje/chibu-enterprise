@@ -56,7 +56,7 @@ function AppLayout() {
             radial-gradient(circle at 0% 100%, rgba(255,176,32,0.05), transparent 40%);
         }
         .sidebar {
-          width: 236px;
+          width: 256px;
           flex-shrink: 0;
           border-right: 1px solid var(--border);
           padding: 22px 16px;
@@ -71,8 +71,8 @@ function AppLayout() {
           display: flex; align-items: center; justify-content: center;
           font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: #14181D; font-size: 15px;
         }
-        .brand-text { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.02em; line-height: 1.1; }
-        .brand-sub { font-size: 10.5px; color: var(--dim); letter-spacing: 0.14em; text-transform: uppercase; margin-top: 2px; }
+        .brand-text { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 0.02em; line-height: 1.1; width: max-content; }
+        .brand-sub { display: flex; justify-content: space-between; font-size: 8px; color: var(--dim); margin-top: 3px; font-weight: 600; width: 100%; text-transform: uppercase; }
         .nav { display: flex; flex-direction: column; gap: 2px; }
         .nav-item {
           display: flex; align-items: center; gap: 11px;
@@ -206,9 +206,14 @@ function AppLayout() {
       <aside className={`sidebar ${navOpen ? "open" : ""}`}>
         <div className="brand">
           <div className="brand-mark">CE</div>
-          <div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div className="brand-text">CHIBU ENTERPRISES</div>
-            <div className="brand-sub">Security &amp; Power Systems</div>
+            <div className="brand-sub">
+              <span>Security</span>
+              <span>&amp;</span>
+              <span>Power</span>
+              <span>Systems</span>
+            </div>
           </div>
         </div>
         <nav className="nav">
