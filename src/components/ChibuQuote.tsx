@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 import {
   Camera, Sun, ShieldCheck, Grid3x3, Zap, Plus, Trash2, Download,
   Send, Phone, Mail, MapPin, Calendar, Hash, ChevronDown
@@ -37,6 +39,35 @@ export default function ChibuQuote() {
   const [items, setItems] = useState(initialItems);
   const [notes, setNotes] = useState("50% deposit on acceptance, balance due on completion. Quote valid for 14 days. 12-month warranty on installation workmanship.");
   const [openMenu, setOpenMenu] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handleDownloadPdf = async () => {
+    if (!printRef.current) return;
+    setIsGenerating(true);
+    
+    try {
+      const element = printRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2, // higher resolution
+        useCORS: true,
+        backgroundColor: "#F7F3EC"
+      });
+      
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF("p", "mm", "a4");
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Quote_${quoteNo}.pdf`);
+    } catch (err) {
+      console.error("Failed to generate PDF", err);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const addItem = () => {
     idSeed += 1;
@@ -187,7 +218,9 @@ export default function ChibuQuote() {
           <div className="page-sub">Quote {quoteNo} &middot; build line items on the left, preview updates live</div>
         </div>
         <div className="head-actions">
-          <button className="btn btn-ghost"><Download size={15} /> Download PDF</button>
+          <button className="btn btn-ghost" onClick={handleDownloadPdf} disabled={isGenerating}>
+            <Download size={15} /> {isGenerating ? "Generating..." : "Download PDF"}
+          </button>
           <button className="btn btn-primary"><Send size={15} /> Send to Client</button>
         </div>
       </div>
@@ -284,7 +317,7 @@ export default function ChibuQuote() {
         {/* PREVIEW */}
         <div className="preview-shell">
           <div className="preview-tag"><span><span className="dot" />Live Preview</span> A4 &middot; Quotation</div>
-          <div className="paper">
+          <div className="paper" ref={printRef}>
             <div className="paper-head">
               <div className="paper-brand">
                 <div className="paper-mark">CE</div>
