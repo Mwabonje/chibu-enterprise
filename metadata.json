@@ -1,0 +1,6 @@
+{
+  "name": "Chibu Enterprises Mgmt",
+  "description": "Business management application for quotations, invoices, and customer management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
