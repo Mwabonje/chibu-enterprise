@@ -8,7 +8,7 @@ import {
 import ChibuDashboard from "./components/ChibuDashboard";
 import CustomersView from "./components/CustomersView";
 import ChibuQuote from "./components/ChibuQuote";
-import InvoicesView from "./components/InvoicesView";
+import InvoicesView from "./components/ChibuInvoices";
 import InvoiceDetailView from "./components/InvoiceDetailView";
 import PaymentsView from "./components/PaymentsView";
 
