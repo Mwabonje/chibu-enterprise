@@ -49,7 +49,6 @@ const navItems = [
   { label: "Invoices", icon: FileSpreadsheet },
   { label: "Payments", icon: Banknote },
   { label: "Performance", icon: TrendingUp },
-  { label: "Settings", icon: Settings },
 ];
 
 interface StatTileProps {
@@ -247,9 +246,12 @@ export default function App() {
           })}
         </nav>
         <div className="sidebar-foot">
-          <div className="status-chip">
-            <span className="pulse-dot" />
-            SYSTEM ARMED &middot; ALL SITES MONITORED
+          <div
+            className={`nav-item ${active === "Settings" ? "active" : ""}`}
+            onClick={() => { setActive("Settings"); setNavOpen(false); }}
+          >
+            <Settings size={16} />
+            Settings
           </div>
         </div>
       </aside>
