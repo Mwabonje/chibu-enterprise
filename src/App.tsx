@@ -1,80 +1,35 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useState } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import {
-  Camera, Sun, ShieldCheck, Grid3x3, Zap, LayoutDashboard, Briefcase,
-  Users, Package, Settings, Plus, MapPin, ChevronRight, Menu, X,
-  TrendingUp, Clock, CheckCircle2, FileText, Radio, FileSpreadsheet, Banknote
+  LayoutDashboard, Users, Settings, Plus, Menu, X,
+  TrendingUp, FileText, FileSpreadsheet, Banknote
 } from "lucide-react";
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell
-} from "recharts";
 
-const services = [
-  { name: "CCTV Installation", icon: Camera, active: 9, color: "#3FC1E0", tint: "rgba(63,193,224,0.12)" },
-  { name: "Solar Installation", icon: Sun, active: 5, color: "#FFB020", tint: "rgba(255,176,32,0.12)" },
-  { name: "Alarm System Installation", icon: ShieldCheck, active: 6, color: "#FF7A59", tint: "rgba(255,122,89,0.12)" },
-  { name: "Window & Staircase Grill", icon: Grid3x3, active: 4, color: "#9BA8B4", tint: "rgba(155,168,180,0.12)" },
-  { name: "Electric Fence Installation", icon: Zap, active: 3, color: "#35D399", tint: "rgba(53,211,153,0.12)" },
-];
-
-const jobs = [
-  { client: "Aisha Mwangi", service: "CCTV Installation", loc: "Nyali, Mombasa", status: "In Progress", date: "Aug 19" },
-  { client: "James Otieno", service: "Solar Installation", loc: "Bamburi, Mombasa", status: "Quoted", date: "Aug 18" },
-  { client: "Fatuma Said", service: "Electric Fence Installation", loc: "Kilifi", status: "Completed", date: "Aug 17" },
-  { client: "David Kimani", service: "Alarm System Installation", loc: "Diani", status: "In Progress", date: "Aug 16" },
-  { client: "Grace Wanjiru", service: "Window & Staircase Grill", loc: "Nakuru", status: "Scheduled", date: "Aug 15" },
-  { client: "Peter Mwakio", service: "CCTV Installation", loc: "Malindi", status: "Completed", date: "Aug 14" },
-  { client: "Halima Abdi", service: "Solar Installation", loc: "Kilifi", status: "In Progress", date: "Aug 13" },
-];
-
-type StatusType = "Completed" | "In Progress" | "Scheduled" | "Quoted";
-
-const statusStyle: Record<StatusType, { color: string; bg: string }> = {
-  "Completed": { color: "#35D399", bg: "rgba(53,211,153,0.12)" },
-  "In Progress": { color: "#FFB020", bg: "rgba(255,176,32,0.12)" },
-  "Scheduled": { color: "#3FC1E0", bg: "rgba(63,193,224,0.12)" },
-  "Quoted": { color: "#9BA8B4", bg: "rgba(155,168,180,0.12)" },
-};
-
-const chartData = services.map(s => ({ name: s.name.split(" ")[0], jobs: s.active, color: s.color }));
+import ChibuDashboard from "./components/ChibuDashboard";
+import CustomersView from "./components/CustomersView";
+import QuotationsView from "./components/QuotationsView";
+import InvoicesView from "./components/InvoicesView";
+import InvoiceDetailView from "./components/InvoiceDetailView";
+import PaymentsView from "./components/PaymentsView";
 
 const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard },
-  { label: "Clients", icon: Users },
-  { label: "Quotes", icon: FileText },
-  { label: "Invoices", icon: FileSpreadsheet },
-  { label: "Payments", icon: Banknote },
-  { label: "Performance", icon: TrendingUp },
+  { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+  { label: "Clients", icon: Users, path: "/customers" },
+  { label: "Quotes", icon: FileText, path: "/quotes" },
+  { label: "Invoices", icon: FileSpreadsheet, path: "/invoices" },
+  { label: "Payments", icon: Banknote, path: "/payments" },
+  { label: "Performance", icon: TrendingUp, path: "/performance" },
 ];
 
-interface StatTileProps {
-  label: string;
-  value: string | number;
-  sub: string;
-  accent: string;
-}
-
-function StatTile({ label, value, sub, accent }: StatTileProps) {
-  return (
-    <div className="stat-tile">
-      <div className="corner tl" style={{ borderColor: accent }} />
-      <div className="corner tr" style={{ borderColor: accent }} />
-      <div className="corner bl" style={{ borderColor: accent }} />
-      <div className="corner br" style={{ borderColor: accent }} />
-      <div className="stat-label">{label}</div>
-      <div className="stat-value">{value}</div>
-      <div className="stat-sub" style={{ color: accent }}>{sub}</div>
-    </div>
-  );
-}
-
-export default function App() {
-  const [active, setActive] = useState("Dashboard");
+function AppLayout() {
   const [navOpen, setNavOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNav = (path: string) => {
+    navigate(path);
+    setNavOpen(false);
+  };
 
   return (
     <div className="app">
@@ -146,7 +101,21 @@ export default function App() {
           100% { box-shadow: 0 0 0 0 rgba(53,211,153,0); }
         }
 
-        .main { flex: 1; min-width: 0; padding: 22px 28px 40px; }
+        .main { flex: 1; min-width: 0; padding: 22px 28px 40px; overflow-y: auto; }
+        
+        /* Overrides for light-themed old components so they look slightly better */
+        .main .bg-white {
+           background-color: var(--panel) !important;
+           border-color: var(--border) !important;
+           color: var(--text) !important;
+        }
+        .main .bg-gray-50 {
+           background-color: var(--panel-2) !important;
+        }
+        .main .text-gray-900, .main .text-gray-800 { color: var(--text) !important; }
+        .main .text-gray-500, .main .text-gray-600 { color: var(--dim) !important; }
+        .main .border-gray-200, .main .border-gray-100 { border-color: var(--border) !important; }
+
         .topbar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 12px; }
         .greeting { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 600; }
         .greeting-sub { color: var(--dim); font-size: 13px; margin-top: 3px; }
@@ -233,11 +202,13 @@ export default function App() {
         <nav className="nav">
           {navItems.map((item) => {
             const Icon = item.icon;
+            // Handle both exact match or sub-routes (e.g. /invoices/:id)
+            const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
             return (
               <div
                 key={item.label}
-                className={`nav-item ${active === item.label ? "active" : ""}`}
-                onClick={() => { setActive(item.label); setNavOpen(false); }}
+                className={`nav-item ${isActive ? "active" : ""}`}
+                onClick={() => handleNav(item.path)}
               >
                 <Icon size={16} />
                 {item.label}
@@ -247,8 +218,8 @@ export default function App() {
         </nav>
         <div className="sidebar-foot">
           <div
-            className={`nav-item ${active === "Settings" ? "active" : ""}`}
-            onClick={() => { setActive("Settings"); setNavOpen(false); }}
+            className={`nav-item ${location.pathname.startsWith("/settings") ? "active" : ""}`}
+            onClick={() => handleNav("/settings")}
           >
             <Settings size={16} />
             Settings
@@ -273,99 +244,26 @@ export default function App() {
           </div>
         </div>
 
-        <div className="stat-grid">
-          <StatTile label="Active Installations" value="14" sub="+3 this week" accent="#3FC1E0" />
-          <StatTile label="Pending Quotes" value="07" sub="Awaiting approval" accent="#FFB020" />
-          <StatTile label="Revenue, MTD" value="KES 486,200" sub="+18% vs last month" accent="#35D399" />
-          <StatTile label="Completed Jobs, MTD" value="22" sub="98% on schedule" accent="#FF7A59" />
-        </div>
-
-        <div className="section-title">
-          Service Lines <span className="tag">ACTIVE JOBS BY CATEGORY</span>
-        </div>
-        <div className="services-grid">
-          {services.map((s) => {
-            const Icon = s.icon;
-            return (
-              <div className="service-card" key={s.name}>
-                <div className="service-icon" style={{ background: s.tint }}>
-                  <Icon size={18} color={s.color} />
-                </div>
-                <div className="service-name">{s.name}</div>
-                <div className="service-count" style={{ color: s.color }}>{s.active}</div>
-                <div className="service-count-label">active jobs</div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="lower-grid">
-          <div className="panel-block">
-            <div className="section-title">
-              Jobs by Category <span className="tag">THIS MONTH</span>
-            </div>
-            <ResponsiveContainer width="100%" height={230}>
-              <BarChart data={chartData} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#29323C" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#8A97A5", fontSize: 11 }} axisLine={{ stroke: "#29323C" }} tickLine={false} />
-                <YAxis tick={{ fill: "#8A97A5", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  cursor={{ fill: "rgba(255,255,255,0.03)" }}
-                  contentStyle={{ background: "#1E2731", border: "1px solid #29323C", borderRadius: 8, fontSize: 12 }}
-                  labelStyle={{ color: "#E9EFF4" }}
-                />
-                <Bar dataKey="jobs" radius={[5, 5, 0, 0]}>
-                  {chartData.map((d, i) => <Cell key={i} fill={d.color} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-
-            <div className="quick-actions">
-              <button className="quick-btn"><Users size={14} /> New Client</button>
-              <button className="quick-btn"><FileText size={14} /> Generate Quote</button>
-              <button className="quick-btn"><Radio size={14} /> Site Check-in</button>
-            </div>
-          </div>
-
-          <div className="panel-block">
-            <div className="section-title">
-              Recent Jobs <span className="tag">LAST 7 ENTRIES</span>
-            </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Client</th>
-                  <th>Service</th>
-                  <th>Location</th>
-                  <th>Status</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {jobs.map((j, i) => (
-                  <tr key={i}>
-                    <td>
-                      <div className="client-name">{j.client}</div>
-                      <div className="date-cell">{j.date}</div>
-                    </td>
-                    <td style={{ fontSize: 12.5 }}>{j.service}</td>
-                    <td>
-                      <div className="loc-cell"><MapPin size={11} /> {j.loc}</div>
-                    </td>
-                    <td>
-                      <span className="badge" style={{ color: statusStyle[j.status as StatusType].color, background: statusStyle[j.status as StatusType].bg }}>
-                        {j.status}
-                      </span>
-                    </td>
-                    <td><ChevronRight size={14} color="#8A97A5" /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <Routes>
+          <Route path="/" element={<ChibuDashboard />} />
+          <Route path="/customers" element={<CustomersView />} />
+          <Route path="/quotes" element={<QuotationsView />} />
+          <Route path="/invoices" element={<InvoicesView />} />
+          <Route path="/invoices/:id" element={<InvoiceDetailView />} />
+          <Route path="/payments" element={<PaymentsView />} />
+          <Route path="/performance" element={<div className="panel-block"><h1 className="text-xl font-bold">Performance</h1><p className="text-sm mt-2 text-[#8A97A5]">Performance analytics coming soon...</p></div>} />
+          <Route path="/settings" element={<div className="panel-block"><h1 className="text-xl font-bold">Settings</h1><p className="text-sm mt-2 text-[#8A97A5]">System configuration coming soon...</p></div>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
     </div>
   );
 }
 
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppLayout />
+    </BrowserRouter>
+  );
+}
