@@ -7,7 +7,7 @@ import {
 
 import ChibuDashboard from "./components/ChibuDashboard";
 import CustomersView from "./components/CustomersView";
-import QuotationsView from "./components/QuotationsView";
+import ChibuQuote from "./components/ChibuQuote";
 import InvoicesView from "./components/InvoicesView";
 import InvoiceDetailView from "./components/InvoiceDetailView";
 import PaymentsView from "./components/PaymentsView";
@@ -247,7 +247,7 @@ function AppLayout() {
         <Routes>
           <Route path="/" element={<ChibuDashboard />} />
           <Route path="/customers" element={<CustomersView />} />
-          <Route path="/quotes" element={<QuotationsView />} />
+          <Route path="/quotes" element={<ChibuQuote />} />
           <Route path="/invoices" element={<InvoicesView />} />
           <Route path="/invoices/:id" element={<InvoiceDetailView />} />
           <Route path="/payments" element={<PaymentsView />} />
