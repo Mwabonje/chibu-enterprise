@@ -51,11 +51,53 @@ const initialItems = [
   },
 ];
 
+const PAST_QUOTES = [
+  {
+    id: "QT-2026-0147",
+    client: { name: "David Kimani", phone: "+254 700 111 222", email: "david.k@example.com", location: "Mtwapa, Kilifi" },
+    date: "18 Aug 2026",
+    validUntil: "01 Sep 2026",
+    items: [
+      {
+        id: 1,
+        service: "Solar Installation",
+        materials: [
+          { id: 10, name: "5kW Inverter", qty: 1, price: 85000 },
+          { id: 11, name: "Solar Panels 450W", qty: 6, price: 14000 },
+          { id: 12, name: "Installation Labor", qty: 1, price: 25000 }
+        ]
+      }
+    ],
+    notes: "50% deposit on acceptance. 5-year warranty on inverter."
+  },
+  {
+    id: "QT-2026-0146",
+    client: { name: "Fatuma Said", phone: "+254 722 333 444", email: "fatuma.s@example.com", location: "Diani Beach" },
+    date: "15 Aug 2026",
+    validUntil: "29 Aug 2026",
+    items: [
+      {
+        id: 1,
+        service: "Window & Staircase Grill",
+        materials: [
+          { id: 10, name: "Window Grills (Custom)", qty: 8, price: 4500 },
+          { id: 11, name: "Steel Door", qty: 1, price: 18000 },
+          { id: 12, name: "Fabrication & Labor", qty: 1, price: 15000 }
+        ]
+      }
+    ],
+    notes: "Quote valid for 14 days."
+  }
+];
+
 function money(n: number) {
   return "KES " + n.toLocaleString("en-KE", { minimumFractionDigits: 0 });
 }
 
 export default function ChibuQuote() {
+  const [viewMode, setViewMode] = useState<"builder" | "history">("builder");
+  const [selectedPastQuoteId, setSelectedPastQuoteId] = useState<string | null>(PAST_QUOTES[0].id);
+
   const [client, setClient] = useState({
     name: "Aisha Mwangi",
     phone: "+254 712 345 678",
@@ -139,8 +181,19 @@ export default function ChibuQuote() {
     }));
   };
 
-  // Calculate totals
-  const subtotal = items.reduce((sum, service) => {
+  // Calculate totals based on viewMode
+  const activeQuote = viewMode === "history" 
+    ? (PAST_QUOTES.find(q => q.id === selectedPastQuoteId) || PAST_QUOTES[0])
+    : {
+        id: quoteNo,
+        client: client,
+        date: date,
+        validUntil: validUntil,
+        items: items,
+        notes: notes
+      };
+
+  const subtotal = activeQuote.items.reduce((sum, service) => {
     const serviceTotal = service.materials.reduce((mSum, m) => mSum + (Number(m.qty) || 0) * (Number(m.price) || 0), 0);
     return sum + serviceTotal;
   }, 0);
@@ -182,8 +235,25 @@ export default function ChibuQuote() {
 
         .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 18px; align-items: stretch; }
 
+        /* ---- Tabs ---- */
+        .tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+        .tab-btn { font-size: 11.5px; font-weight: 600; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--border); color: var(--dim); cursor: pointer; background: transparent; }
+        .tab-btn.active { background: var(--panel-2); color: var(--text); border-color: var(--amber); }
+
+        /* ---- History List ---- */
+        .quote-row { display: flex; align-items: center; gap: 12px; padding: 12px 10px; border-radius: 9px; cursor: pointer; border: 1px solid transparent; margin-bottom: 4px; }
+        .quote-row:hover { background: var(--panel-2); }
+        .quote-row.selected { background: var(--panel-2); border-color: var(--amber); }
+        .quote-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .quote-mid { flex: 1; min-width: 0; }
+        .quote-client { font-size: 13px; font-weight: 600; }
+        .quote-meta { font-size: 11px; color: var(--dim); margin-top: 2px; display: flex; gap: 6px; align-items: center; }
+        .quote-right { text-align: right; }
+        .quote-amount { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; }
+        .empty-state { text-align: center; padding: 30px 10px; color: var(--dim); font-size: 13px; }
+
         /* ---- Builder (dark control panel) ---- */
-        .builder { min-width: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; }
+        .left-panel { min-width: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; }
         .block-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--dim); margin-bottom: 9px; font-weight: 600; }
         .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 10px; }
         .field { display: flex; flex-direction: column; gap: 5px; }
@@ -300,8 +370,8 @@ export default function ChibuQuote() {
 
       <div className="page-head">
         <div>
-          <div className="page-title">New Quote</div>
-          <div className="page-sub">Quote {quoteNo} &middot; build line items on the left, preview updates live</div>
+          <div className="page-title">Quotations</div>
+          <div className="page-sub">Create and manage client quotations</div>
         </div>
         <div className="head-actions">
           <button className="btn btn-ghost" onClick={handleDownloadPdf} disabled={isGenerating}>
@@ -312,33 +382,40 @@ export default function ChibuQuote() {
       </div>
 
       <div className="layout">
-        {/* BUILDER */}
-        <div className="builder">
-          <div className="block-label">Client Details</div>
-          <div className="field-row">
-            <div className="field">
-              <label>Client name</label>
-              <input value={client.name} onChange={(e) => setClient({ ...client, name: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>Phone</label>
-              <input value={client.phone} onChange={(e) => setClient({ ...client, phone: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>Email</label>
-              <input value={client.email} onChange={(e) => setClient({ ...client, email: e.target.value })} />
-            </div>
-            <div className="field">
-              <label>Site location</label>
-              <input value={client.location} onChange={(e) => setClient({ ...client, location: e.target.value })} />
-            </div>
+        {/* LEFT PANEL */}
+        <div className="left-panel">
+          <div className="tabs">
+            <div className={`tab-btn ${viewMode === "builder" ? "active" : ""}`} onClick={() => setViewMode("builder")}>New Quote</div>
+            <div className={`tab-btn ${viewMode === "history" ? "active" : ""}`} onClick={() => setViewMode("history")}>Quote History</div>
           </div>
 
-          <div className="divider" />
+          {viewMode === "builder" && (
+            <div style={{ flex: 1, overflowY: "auto", paddingRight: 4, marginRight: -4, display: "flex", flexDirection: "column" }}>
+              <div className="block-label">Client Details</div>
+              <div className="field-row">
+                <div className="field">
+                  <label>Client name</label>
+                  <input value={client.name} onChange={(e) => setClient({ ...client, name: e.target.value })} />
+                </div>
+                <div className="field">
+                  <label>Phone</label>
+                  <input value={client.phone} onChange={(e) => setClient({ ...client, phone: e.target.value })} />
+                </div>
+                <div className="field">
+                  <label>Email</label>
+                  <input value={client.email} onChange={(e) => setClient({ ...client, email: e.target.value })} />
+                </div>
+                <div className="field">
+                  <label>Site location</label>
+                  <input value={client.location} onChange={(e) => setClient({ ...client, location: e.target.value })} />
+                </div>
+              </div>
 
-          <div className="block-label">Services &amp; Materials</div>
-          {items.map((serviceBlock) => {
-            const meta = serviceMeta(serviceBlock.service);
+              <div className="divider" />
+
+              <div className="block-label">Services &amp; Materials</div>
+              {items.map((serviceBlock) => {
+                const meta = serviceMeta(serviceBlock.service);
             const Icon = meta.icon;
             
             const serviceTotal = serviceBlock.materials.reduce((sum, m) => sum + (Number(m.qty) || 0) * (Number(m.price) || 0), 0);
@@ -412,13 +489,51 @@ export default function ChibuQuote() {
 
           <div className="block-label">Terms &amp; Notes</div>
           <div className="field notes-field">
-            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} />
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
           </div>
+            </div>
+          )}
+
+          {viewMode === "history" && (
+            <div style={{ flex: 1, overflowY: "auto", paddingRight: 4, marginRight: -4 }}>
+              {PAST_QUOTES.length === 0 && <div className="empty-state">No past quotations found.</div>}
+              {PAST_QUOTES.map((pq) => {
+                const total = pq.items.reduce((acc, svc) => {
+                  return acc + svc.materials.reduce((mSum, m) => mSum + (Number(m.qty) || 0) * (Number(m.price) || 0), 0);
+                }, 0) * (1 + VAT_RATE);
+                
+                return (
+                  <div
+                    key={pq.id}
+                    className={`quote-row ${selectedPastQuoteId === pq.id ? "selected" : ""}`}
+                    onClick={() => setSelectedPastQuoteId(pq.id)}
+                  >
+                    <div className="quote-icon" style={{ background: "rgba(255,176,32,0.15)" }}>
+                      <Zap size={16} color="#FFB020" />
+                    </div>
+                    <div className="quote-mid">
+                      <div className="quote-client">{pq.client.name}</div>
+                      <div className="quote-meta">{pq.id} &middot; <MapPin size={10} /> {pq.client.location}</div>
+                    </div>
+                    <div className="quote-right">
+                      <div className="quote-amount">{money(Math.round(total))}</div>
+                      <div className="quote-meta" style={{ justifyContent: "flex-end", marginTop: 4 }}>{pq.date}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* PREVIEW */}
         <div className="preview-shell">
-          <div className="preview-tag"><span><span className="dot" />Live Preview</span> A4 &middot; Quotation</div>
+          <div className="preview-tag">
+            <span>
+              {viewMode === "builder" ? <><span className="dot" />Live Preview</> : "Quotation Viewer"}
+            </span> 
+            A4 &middot; Quotation
+          </div>
           <div className="paper" ref={printRef}>
             <div className="paper-head">
               <div className="paper-brand">
@@ -442,16 +557,16 @@ export default function ChibuQuote() {
             <div className="paper-info-row">
               <div className="paper-info-block">
                 <div className="paper-info-label">Prepared For</div>
-                <div className="paper-info-name">{client.name || "—"}</div>
-                <div>{client.location || "—"}</div>
-                <div>{client.phone}{client.email ? " · " + client.email : ""}</div>
+                <div className="paper-info-name">{activeQuote.client.name || "—"}</div>
+                <div>{activeQuote.client.location || "—"}</div>
+                <div>{activeQuote.client.phone}{activeQuote.client.email ? " · " + activeQuote.client.email : ""}</div>
               </div>
               <div className="paper-info-block" style={{ textAlign: "right" }}>
                 <div className="paper-title">Quotation</div>
                 <div style={{ marginTop: 8 }}>
-                  <span className="paper-info-label" style={{ display: "inline" }}>No.</span> {quoteNo}<br />
-                  <span className="paper-info-label" style={{ display: "inline" }}>Date</span> {date}<br />
-                  <span className="paper-info-label" style={{ display: "inline" }}>Valid Until</span> {validUntil}
+                  <span className="paper-info-label" style={{ display: "inline" }}>No.</span> {activeQuote.id}<br />
+                  <span className="paper-info-label" style={{ display: "inline" }}>Date</span> {activeQuote.date}<br />
+                  <span className="paper-info-label" style={{ display: "inline" }}>Valid Until</span> {activeQuote.validUntil}
                 </div>
               </div>
             </div>
@@ -467,7 +582,7 @@ export default function ChibuQuote() {
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((serviceBlock) => {
+                  {activeQuote.items.map((serviceBlock) => {
                     const meta = serviceMeta(serviceBlock.service);
                     return (
                       <React.Fragment key={serviceBlock.id}>
@@ -505,7 +620,7 @@ export default function ChibuQuote() {
 
             <div className="paper-notes">
               <div className="paper-notes-label">Terms &amp; Notes</div>
-              {notes}
+              {activeQuote.notes}
             </div>
 
             <div className="paper-foot">Thank you for choosing Chibu Enterprises &middot; chibuenterprises.co.ke</div>
