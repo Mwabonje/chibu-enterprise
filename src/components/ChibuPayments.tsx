@@ -112,10 +112,10 @@ export default function ChibuPayments() {
         .stat-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; gap: 6px; }
         .stat-value { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; margin-top: 7px; }
 
-        .layout { display: grid; grid-template-columns: 1fr 1.15fr; gap: 16px; align-items: start; margin-bottom: 18px; }
+        .layout { display: grid; grid-template-columns: 1fr 1.15fr; gap: 16px; align-items: stretch; margin-bottom: 18px; }
 
         /* ---- FORM ---- */
-        .form-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+        .form-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; }
         .block-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--dim); margin-bottom: 10px; font-weight: 600; }
         .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
         .field label { font-size: 11px; color: var(--dim); }
@@ -151,17 +151,18 @@ export default function ChibuPayments() {
         .balance-strip { display: flex; justify-content: space-between; align-items: center; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin: 4px 0 16px; font-size: 12px; }
         .balance-strip .mono { font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
 
+        .submit-btn { margin-top: auto; }
         .btn { display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 13px; font-weight: 600; padding: 10px 15px; border-radius: 8px; cursor: pointer; border: none; width: 100%; }
         .btn-primary { background: var(--amber); color: #14181D; }
 
         /* ---- RECEIPT PREVIEW ---- */
-        .preview-shell { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+        .preview-shell { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; }
         .preview-tag { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--dim); margin-bottom: 12px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         .preview-actions { display: flex; gap: 8px; }
         .icon-btn { display: flex; align-items: center; gap: 5px; background: var(--panel-2); border: 1px solid var(--border); color: var(--text); font-size: 11px; font-weight: 600; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
         .icon-btn:hover { border-color: var(--amber); }
 
-        .paper { position: relative; background: #F7F3EC; color: #23201B; border-radius: 4px; padding: 30px; font-family: 'Inter', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+        .paper { position: relative; background: #F7F3EC; color: #23201B; border-radius: 4px; padding: 30px; font-family: 'Inter', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.35); flex: 1; display: flex; flex-direction: column; }
         .paper-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #23201B; padding-bottom: 14px; margin-bottom: 16px; }
         .paper-brand { display: flex; align-items: center; gap: 10px; }
         .paper-mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg,#FFB020,#FF7A59); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; color:#20140A; font-size:13px; }
@@ -180,7 +181,7 @@ export default function ChibuPayments() {
 
         .paper-balance-row { display: flex; justify-content: space-between; font-size: 12.5px; padding: 6px 0; }
         .paper-balance-row.total { font-weight: 700; font-size: 14px; padding-top: 10px; border-top: 2px solid #23201B; margin-top: 6px; }
-        .paper-foot { margin-top: 20px; text-align: center; font-size: 10px; color: #8C8375; letter-spacing: 0.03em; }
+        .paper-foot { margin-top: auto; padding-top: 20px; text-align: center; font-size: 10px; color: #8C8375; letter-spacing: 0.03em; }
 
         /* ---- TRANSACTION LOG ---- */
         .log-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
@@ -307,7 +308,7 @@ export default function ChibuPayments() {
             </span>
           </div>
 
-          <button className="btn btn-primary" onClick={recordPayment}><Plus size={15} /> Record Payment</button>
+          <button className="btn btn-primary submit-btn" onClick={recordPayment}><Plus size={15} /> Record Payment</button>
         </div>
 
         {/* RECEIPT PREVIEW */}
