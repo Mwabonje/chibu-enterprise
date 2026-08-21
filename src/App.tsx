@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 
 import ChibuDashboard from "./components/ChibuDashboard";
-import CustomersView from "./components/CustomersView";
+import ChibuClients from "./components/ChibuClients";
 import ChibuQuote from "./components/ChibuQuote";
 import InvoicesView from "./components/ChibuInvoices";
 import InvoiceDetailView from "./components/InvoiceDetailView";
@@ -264,7 +264,7 @@ function AppLayout() {
 
         <Routes>
           <Route path="/" element={<ChibuDashboard />} />
-          <Route path="/customers" element={<CustomersView />} />
+          <Route path="/customers" element={<ChibuClients />} />
           <Route path="/quotes" element={<ChibuQuote />} />
           <Route path="/invoices" element={<InvoicesView />} />
           <Route path="/invoices/:id" element={<InvoiceDetailView />} />
