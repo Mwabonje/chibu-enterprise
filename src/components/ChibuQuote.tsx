@@ -180,10 +180,10 @@ export default function ChibuQuote() {
         .btn-ghost:hover { border-color: var(--amber); }
         .btn-primary { background: var(--amber); color: #14181D; border: none; }
 
-        .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 18px; align-items: start; }
+        .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 18px; align-items: stretch; }
 
         /* ---- Builder (dark control panel) ---- */
-        .builder { min-width: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+        .builder { min-width: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; }
         .block-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--dim); margin-bottom: 9px; font-weight: 600; }
         .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 10px; }
         .field { display: flex; flex-direction: column; gap: 5px; }
@@ -234,14 +234,16 @@ export default function ChibuQuote() {
         .notes-field textarea { min-height: 70px; resize: vertical; }
 
         /* ---- Preview (printed quote, light paper) ---- */
-        .preview-shell { min-width: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+        .preview-shell { min-width: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; }
         .preview-tag { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--dim); margin-bottom: 12px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         .preview-tag .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 6px; }
 
         .paper {
           background: #F7F3EC; color: #23201B; border-radius: 4px; padding: 34px 32px;
           font-family: 'Inter', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+          flex: 1; display: flex; flex-direction: column;
         }
+
         .paper-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #23201B; padding-bottom: 16px; margin-bottom: 18px; }
         .paper-brand { display: flex; align-items: center; gap: 10px; }
         .paper-mark { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg,#FFB020,#FF7A59); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; color:#20140A; font-size:15px; }
@@ -274,7 +276,7 @@ export default function ChibuQuote() {
         .paper-totals-row { display: flex; justify-content: space-between; padding: 6px 0; color: #4A443B; }
         .paper-totals-row.grand { border-top: 2px solid #23201B; margin-top: 6px; padding-top: 10px; font-weight: 700; font-size: 15px; color: #23201B; }
 
-        .paper-notes { margin-top: 24px; border-top: 1px dashed #C9BFAC; padding-top: 14px; font-size: 11px; color: #5A5347; line-height: 1.7; }
+        .paper-notes { border-top: 1px dashed #C9BFAC; padding-top: 14px; font-size: 11px; color: #5A5347; line-height: 1.7; }
         .paper-notes-label { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.1em; color: #8C8375; font-weight: 600; margin-bottom: 5px; }
         .paper-foot { margin-top: 22px; text-align: center; font-size: 10.5px; color: #8C8375; letter-spacing: 0.03em; }
 
@@ -498,6 +500,8 @@ export default function ChibuQuote() {
               <div className="paper-totals-row"><span>VAT (16%)</span><span className="mono">{money(vat)}</span></div>
               <div className="paper-totals-row grand"><span>Total</span><span className="mono">{money(total)}</span></div>
             </div>
+
+            <div style={{ flex: 1, minHeight: 24 }} />
 
             <div className="paper-notes">
               <div className="paper-notes-label">Terms &amp; Notes</div>
