@@ -119,9 +119,9 @@ export default function ChibuInvoices() {
         .stat-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
         .stat-value { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; margin-top: 7px; }
 
-        .layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 16px; align-items: start; }
+        .layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 16px; align-items: stretch; }
 
-        .list-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+        .list-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; }
         .search-box { display: flex; align-items: center; gap: 8px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 11px; margin-bottom: 12px; }
         .search-box input { background: transparent; border: none; outline: none; color: var(--text); font-size: 13px; width: 100%; }
         .tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
@@ -140,7 +140,7 @@ export default function ChibuInvoices() {
         .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 600; margin-top: 4px; }
         .empty-state { text-align: center; padding: 30px 10px; color: var(--dim); font-size: 13px; }
 
-        .preview-shell { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+        .preview-shell { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; }
         .preview-tag { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--dim); margin-bottom: 12px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
         .preview-actions { display: flex; gap: 8px; }
         .icon-btn { display: flex; align-items: center; gap: 5px; background: var(--panel-2); border: 1px solid var(--border); color: var(--text); font-size: 11px; font-weight: 600; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
@@ -148,7 +148,7 @@ export default function ChibuInvoices() {
         .icon-btn.pay { color: var(--green); }
         .icon-btn.pay:hover { border-color: var(--green); }
 
-        .paper { position: relative; background: #F7F3EC; color: #23201B; border-radius: 4px; padding: 32px; font-family: 'Inter', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.35); overflow: hidden; }
+        .paper { position: relative; background: #F7F3EC; color: #23201B; border-radius: 4px; padding: 32px; font-family: 'Inter', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.35); overflow: hidden; flex: 1; display: flex; flex-direction: column; }
         .stamp { position: absolute; top: 92px; right: 40px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 30px; letter-spacing: 0.08em; border: 4px solid; padding: 4px 16px; border-radius: 8px; transform: rotate(-14deg); opacity: 0.85; }
         .stamp.paid { color: #1F9D6B; border-color: #1F9D6B; }
         .stamp.overdue { color: #E24E3C; border-color: #E24E3C; }
@@ -178,7 +178,7 @@ export default function ChibuInvoices() {
         .paper-totals-row { display: flex; justify-content: space-between; padding: 5px 0; color: #4A443B; }
         .paper-totals-row.grand { border-top: 2px solid #23201B; margin-top: 5px; padding-top: 9px; font-weight: 700; font-size: 14px; color: #23201B; }
 
-        .paper-pay-block { margin-top: 20px; border-top: 1px dashed #C9BFAC; padding-top: 13px; font-size: 10.5px; color: #5A5347; line-height: 1.8; display: flex; justify-content: space-between; gap: 20px; }
+        .paper-pay-block { margin-top: auto; border-top: 1px dashed #C9BFAC; padding-top: 13px; font-size: 10.5px; color: #5A5347; line-height: 1.8; display: flex; justify-content: space-between; gap: 20px; }
         .paper-pay-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: #8C8375; font-weight: 600; margin-bottom: 4px; }
         .paper-foot { margin-top: 18px; text-align: center; font-size: 10px; color: #8C8375; letter-spacing: 0.03em; }
 
@@ -233,36 +233,38 @@ export default function ChibuInvoices() {
             ))}
           </div>
 
-          {filtered.length === 0 && <div className="empty-state">No invoices match this filter.</div>}
+          <div style={{ flex: 1, overflowY: "auto", paddingRight: 4, marginRight: -4 }}>
+            {filtered.length === 0 && <div className="empty-state">No invoices match this filter.</div>}
 
-          {filtered.map((inv) => {
-            const meta = SERVICE_META[inv.service as keyof typeof SERVICE_META];
-            const Icon = meta.icon;
-            const sMeta = STATUS_META[inv.status as keyof typeof STATUS_META];
-            const SIcon = sMeta.icon;
-            const t = invoiceTotal(inv).total;
-            return (
-              <div
-                key={inv.id}
-                className={`inv-row \${selected && selected.id === inv.id ? "selected" : ""}`}
-                onClick={() => setSelectedId(inv.id)}
-              >
-                <div className="inv-icon" style={{ background: meta.color + "20" }}>
-                  <Icon size={16} color={meta.color} />
-                </div>
-                <div className="inv-mid">
-                  <div className="inv-client">{inv.client}</div>
-                  <div className="inv-meta">{inv.no} &middot; <MapPin size={10} /> {inv.location}</div>
-                </div>
-                <div className="inv-right">
-                  <div className="inv-amount">{money(Math.round(t))}</div>
-                  <div className="badge" style={{ color: sMeta.color, background: sMeta.bg }}>
-                    <SIcon size={10} /> {inv.status}
+            {filtered.map((inv) => {
+              const meta = SERVICE_META[inv.service as keyof typeof SERVICE_META];
+              const Icon = meta.icon;
+              const sMeta = STATUS_META[inv.status as keyof typeof STATUS_META];
+              const SIcon = sMeta.icon;
+              const t = invoiceTotal(inv).total;
+              return (
+                <div
+                  key={inv.id}
+                  className={`inv-row \${selected && selected.id === inv.id ? "selected" : ""}`}
+                  onClick={() => setSelectedId(inv.id)}
+                >
+                  <div className="inv-icon" style={{ background: meta.color + "20" }}>
+                    <Icon size={16} color={meta.color} />
+                  </div>
+                  <div className="inv-mid">
+                    <div className="inv-client">{inv.client}</div>
+                    <div className="inv-meta">{inv.no} &middot; <MapPin size={10} /> {inv.location}</div>
+                  </div>
+                  <div className="inv-right">
+                    <div className="inv-amount">{money(Math.round(t))}</div>
+                    <div className="badge" style={{ color: sMeta.color, background: sMeta.bg }}>
+                      <SIcon size={10} /> {inv.status}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
         {selected && (
