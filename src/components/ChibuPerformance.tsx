@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
   Camera, Sun, ShieldCheck, Grid3x3, Zap, TrendingUp, TrendingDown,
-  Star, MapPin, Award, Target, CheckCircle2
+  MapPin, Target, CheckCircle2
 } from "lucide-react";
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
@@ -33,13 +33,6 @@ const yearlyRevenue = [
   { year: "2026 YTD", revenue: 2555200 },
 ];
 
-const technicians = [
-  { name: "Brian Mwangangi", role: "Lead Installer", jobs: 42, revenue: 820000, onTime: 98, rating: 4.9 },
-  { name: "Josephat Karisa", role: "CCTV & Alarm Specialist", jobs: 35, revenue: 640000, onTime: 95, rating: 4.8 },
-  { name: "Ali Bakari", role: "Solar Technician", jobs: 27, revenue: 700000, onTime: 92, rating: 4.7 },
-  { name: "Naomi Chege", role: "Grill & Fence Fabricator", jobs: 34, revenue: 395200, onTime: 96, rating: 4.9 },
-];
-
 const locations = [
   { name: "Mombasa (Nyali / Bamburi)", jobs: 46 },
   { name: "Kilifi", jobs: 28 },
@@ -52,10 +45,9 @@ const locations = [
 const revenueYtd = SERVICES.reduce((s, v) => s + v.revenue, 0);
 const jobsYtd = SERVICES.reduce((s, v) => s + v.jobs, 0);
 const avgJobValue = revenueYtd / jobsYtd;
-const onTimeRate = Math.round(technicians.reduce((s, t) => s + t.jobs * t.onTime, 0) / jobsYtd);
+const onTimeRate = 95;
 const maxServiceRevenue = Math.max(...SERVICES.map((s) => s.revenue));
 const maxLocationJobs = Math.max(...locations.map((l) => l.jobs));
-const maxTechRevenue = Math.max(...technicians.map((t) => t.revenue));
 
 const currentMonthRevenue = revenueTrend[revenueTrend.length - 1].revenue;
 const priorMonthRevenue = revenueTrend[revenueTrend.length - 2].revenue;
@@ -67,9 +59,6 @@ const yearlyGrowthPct = ((currentYearRevenue - priorYearRevenue) / priorYearReve
 
 function money(n: number) {
   return "KES " + Math.round(n).toLocaleString("en-KE");
-}
-function initials(name: string) {
-  return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 }
 
 function Trend({ value, positive = true }: { value: string; positive?: boolean }) {
@@ -111,7 +100,6 @@ export default function ChibuPerformance() {
         .stat-foot { font-size: 11.5px; margin-top: 6px; color: var(--dim); }
 
         .grid-2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; align-items: start; margin-bottom: 16px; }
-        .grid-2b { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; align-items: start; }
         .panel-block { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
         .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; font-weight: 600; margin-bottom: 4px; }
         .section-sub { font-size: 11.5px; color: var(--dim); margin-bottom: 16px; }
@@ -125,21 +113,6 @@ export default function ChibuPerformance() {
         .mix-track { height: 7px; background: var(--panel-2); border-radius: 999px; overflow: hidden; }
         .mix-fill { height: 100%; border-radius: 999px; }
 
-        /* leaderboard */
-        .tech-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .tech-row:last-child { border-bottom: none; }
-        .rank { width: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--dim); flex-shrink: 0; }
-        .avatar { width: 36px; height: 36px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
-        .tech-mid { flex: 1; min-width: 0; }
-        .tech-name { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-        .tech-role { font-size: 11px; color: var(--dim); margin-top: 1px; }
-        .tech-bar-track { height: 5px; background: var(--panel-2); border-radius: 999px; margin-top: 7px; overflow: hidden; }
-        .tech-bar-fill { height: 100%; background: var(--amber); border-radius: 999px; }
-        .tech-right { text-align: right; flex-shrink: 0; }
-        .tech-revenue { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; }
-        .tech-rating { display: flex; align-items: center; gap: 3px; justify-content: flex-end; font-size: 11px; color: var(--dim); margin-top: 3px; }
-        .tech-ontime { font-size: 10.5px; color: var(--green); margin-top: 3px; }
-
         /* locations */
         .loc-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
         .loc-name { width: 42%; font-size: 12.5px; display: flex; align-items: center; gap: 6px; }
@@ -149,7 +122,7 @@ export default function ChibuPerformance() {
 
         @media (max-width: 1000px) {
           .stat-grid { grid-template-columns: 1fr 1fr; }
-          .grid-2, .grid-2b { grid-template-columns: 1fr; }
+          .grid-2 { grid-template-columns: 1fr; }
         }
       `}</style>
 
@@ -203,14 +176,15 @@ export default function ChibuPerformance() {
 
       <div className="grid-2">
         {/* Revenue trend */}
-        <div className="panel-block">
+        <div className="panel-block" style={{ height: "100%", display: "flex", flexDirection: "column" }}>
           <div className="section-title">Revenue Trend &mdash; {revenueView}</div>
           <div className="section-sub">
             {revenueView === "Monthly" ? "Monthly revenue across all service lines, KES (Jan\u2013Aug 2026)" : "Annual revenue across all service lines, KES"}
           </div>
-          <ResponsiveContainer width="100%" height={230}>
-            {revenueView === "Monthly" ? (
-              <AreaChart data={revenueTrend} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
+          <div style={{ flex: 1, minHeight: 300, width: "100%" }}>
+            <ResponsiveContainer width="100%" height="100%">
+              {revenueView === "Monthly" ? (
+                <AreaChart data={revenueTrend} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
                 <defs>
                   <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#FFB020" stopOpacity={0.35} />
@@ -241,71 +215,48 @@ export default function ChibuPerformance() {
                 <Bar dataKey="revenue" fill="#FFB020" radius={[5, 5, 0, 0]} />
               </BarChart>
             )}
-          </ResponsiveContainer>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        {/* Service mix */}
-        <div className="panel-block">
-          <div className="section-title">Revenue by Service</div>
-          <div className="section-sub">Jan &ndash; Aug 2026</div>
-          {SERVICES.slice().sort((a, b) => b.revenue - a.revenue).map((s) => {
-            const Icon = s.icon;
-            return (
-              <div className="mix-row" key={s.name}>
-                <div className="mix-top">
-                  <div className="mix-name"><Icon size={14} color={s.color} /> {s.name}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Service mix */}
+          <div className="panel-block">
+            <div className="section-title">Revenue by Service</div>
+            <div className="section-sub">Jan &ndash; Aug 2026</div>
+            {SERVICES.slice().sort((a, b) => b.revenue - a.revenue).map((s) => {
+              const Icon = s.icon;
+              return (
+                <div className="mix-row" key={s.name}>
+                  <div className="mix-top">
+                    <div className="mix-name"><Icon size={14} color={s.color} /> {s.name}</div>
+                  </div>
+                  <div className="mix-track">
+                    <div className="mix-fill" style={{ width: `${(s.revenue / maxServiceRevenue) * 100}%`, background: s.color }} />
+                  </div>
+                  <div className="mix-figs" style={{ marginTop: 5 }}>
+                    <b>{money(s.revenue)}</b> &middot; {s.jobs} jobs
+                  </div>
                 </div>
-                <div className="mix-track">
-                  <div className="mix-fill" style={{ width: `${(s.revenue / maxServiceRevenue) * 100}%`, background: s.color }} />
-                </div>
-                <div className="mix-figs" style={{ marginTop: 5 }}>
-                  <b>{money(s.revenue)}</b> &middot; {s.jobs} jobs
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+              );
+            })}
+          </div>
 
-      <div className="grid-2b">
-        {/* Technician leaderboard */}
-        <div className="panel-block">
-          <div className="section-title">Technician Leaderboard</div>
-          <div className="section-sub">Ranked by jobs completed, YTD</div>
-          {technicians.slice().sort((a, b) => b.jobs - a.jobs).map((t, i) => (
-            <div className="tech-row" key={t.name}>
-              <div className="rank">{i === 0 ? <Award size={16} color="#FFB020" /> : `#${i + 1}`}</div>
-              <div className="avatar">{initials(t.name)}</div>
-              <div className="tech-mid">
-                <div className="tech-name">{t.name}</div>
-                <div className="tech-role">{t.role} &middot; {t.jobs} jobs</div>
-                <div className="tech-bar-track">
-                  <div className="tech-bar-fill" style={{ width: `${(t.revenue / maxTechRevenue) * 100}%` }} />
-                </div>
+          {/* Top locations */}
+          <div className="panel-block">
+            <div className="section-title">Jobs by Location</div>
+            <div className="section-sub">Where the work is happening, YTD</div>
+            {locations.map((l) => (
+              <div className="loc-row" key={l.name}>
+                <div className="loc-name"><MapPin size={12} color="#8A97A5" /> {l.name}</div>
+                <div className="loc-track"><div className="loc-fill" style={{ width: `${(l.jobs / maxLocationJobs) * 100}%` }} /></div>
+                <div className="loc-count">{l.jobs}</div>
               </div>
-              <div className="tech-right">
-                <div className="tech-revenue">{money(t.revenue)}</div>
-                <div className="tech-rating"><Star size={11} fill="#FFB020" color="#FFB020" /> {t.rating}</div>
-                <div className="tech-ontime">{t.onTime}% on-time</div>
-              </div>
+            ))}
+            <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", fontSize: 12.5 }}>
+              <span style={{ color: "var(--dim)", display: "flex", alignItems: "center", gap: 6 }}><Target size={13} /> Coverage area</span>
+              <span style={{ fontWeight: 600 }}>Coastal Kenya + Nakuru</span>
             </div>
-          ))}
-        </div>
-
-        {/* Top locations */}
-        <div className="panel-block">
-          <div className="section-title">Jobs by Location</div>
-          <div className="section-sub">Where the work is happening, YTD</div>
-          {locations.map((l) => (
-            <div className="loc-row" key={l.name}>
-              <div className="loc-name"><MapPin size={12} color="#8A97A5" /> {l.name}</div>
-              <div className="loc-track"><div className="loc-fill" style={{ width: `${(l.jobs / maxLocationJobs) * 100}%` }} /></div>
-              <div className="loc-count">{l.jobs}</div>
-            </div>
-          ))}
-          <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", fontSize: 12.5 }}>
-            <span style={{ color: "var(--dim)", display: "flex", alignItems: "center", gap: 6 }}><Target size={13} /> Coverage area</span>
-            <span style={{ fontWeight: 600 }}>Coastal Kenya + Nakuru</span>
           </div>
         </div>
       </div>
