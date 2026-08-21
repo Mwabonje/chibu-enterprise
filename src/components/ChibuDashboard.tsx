@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 import { services, chartData, jobs, statusStyle, StatusType } from "../lib/dashboardData";
 import { StatTile } from "./StatTile";
+import { ClockCalendar } from "./ClockCalendar";
 
 export default function ChibuDashboard() {
   return (
@@ -35,32 +36,7 @@ export default function ChibuDashboard() {
         </div>
 
         <div className="lower-grid">
-          <div className="panel-block">
-            <div className="section-title">
-              Jobs by Category <span className="tag">THIS MONTH</span>
-            </div>
-            <ResponsiveContainer width="100%" height={230}>
-              <BarChart data={chartData} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#29323C" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: "#8A97A5", fontSize: 11 }} axisLine={{ stroke: "#29323C" }} tickLine={false} />
-                <YAxis tick={{ fill: "#8A97A5", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  cursor={{ fill: "rgba(255,255,255,0.03)" }}
-                  contentStyle={{ background: "#1E2731", border: "1px solid #29323C", borderRadius: 8, fontSize: 12 }}
-                  labelStyle={{ color: "#E9EFF4" }}
-                />
-                <Bar dataKey="jobs" radius={[5, 5, 0, 0]}>
-                  {chartData.map((d, i) => <Cell key={i} fill={d.color} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-
-            <div className="quick-actions">
-              <button className="quick-btn"><Users size={14} /> New Client</button>
-              <button className="quick-btn"><FileText size={14} /> Generate Quote</button>
-              <button className="quick-btn"><Radio size={14} /> Site Check-in</button>
-            </div>
-          </div>
+          <ClockCalendar />
 
           <div className="panel-block">
             <div className="section-title">

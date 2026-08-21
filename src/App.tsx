@@ -117,20 +117,8 @@ function AppLayout() {
         .main .text-gray-500, .main .text-gray-600 { color: var(--dim) !important; }
         .main .border-gray-200, .main .border-gray-100 { border-color: var(--border) !important; }
 
-        .topbar { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 12px; }
-        .greeting { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 600; }
-        .greeting-sub { color: var(--dim); font-size: 13px; margin-top: 3px; }
+        .mobile-menu-bar { display: none; }
         .menu-btn { display: none; }
-        .topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .date-readout {
-          font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--dim);
-          border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; background: var(--panel);
-        }
-        .btn-primary {
-          display: flex; align-items: center; gap: 6px;
-          background: var(--amber); color: #14181D; font-weight: 600; font-size: 13px;
-          border: none; padding: 9px 14px; border-radius: 8px; cursor: pointer;
-        }
 
         .stat-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 26px; }
         .stat-tile {
@@ -157,8 +145,8 @@ function AppLayout() {
         .service-count { font-family: 'IBM Plex Mono', monospace; font-size: 19px; font-weight: 600; margin-top: 10px; }
         .service-count-label { font-size: 10.5px; color: var(--dim); margin-top: 1px; }
 
-        .lower-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr); gap: 16px; align-items: start; }
-        .panel-block { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+        .lower-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr); gap: 16px; align-items: stretch; }
+        .panel-block { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; }
 
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--dim); font-weight: 500; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
@@ -192,6 +180,7 @@ function AppLayout() {
           .sidebar-overlay.open { display: block; }
           .sidebar { position: fixed; z-index: 20; height: 100vh; background: var(--bg); transform: translateX(-100%); transition: transform 0.2s; }
           .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
+          .mobile-menu-bar { display: flex; margin-bottom: 16px; }
           .menu-btn { display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: var(--panel); border: 1px solid var(--border); color: var(--text); cursor: pointer; margin-right: 10px; }
           .services-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .stat-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
@@ -246,19 +235,9 @@ function AppLayout() {
       </aside>
 
       <main className="main">
-        <div className="topbar">
-          <div style={{ display: "flex", alignItems: "flex-start" }}>
-            <div className="menu-btn" onClick={() => setNavOpen(!navOpen)}>
-              {navOpen ? <X size={16} /> : <Menu size={16} />}
-            </div>
-            <div>
-              <div className="greeting">Good afternoon, Chibu</div>
-              <div className="greeting-sub">7 jobs in progress across 4 counties &middot; 2 quotes awaiting sign-off</div>
-            </div>
-          </div>
-          <div className="topbar-right">
-            <div className="date-readout">MOMBASA &middot; THU 20 AUG 2026</div>
-            <button className="btn-primary"><Plus size={15} /> New Job</button>
+        <div className="mobile-menu-bar">
+          <div className="menu-btn" onClick={() => setNavOpen(!navOpen)}>
+            {navOpen ? <X size={16} /> : <Menu size={16} />}
           </div>
         </div>
 
