@@ -3,7 +3,7 @@ import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import {
   Camera, Sun, ShieldCheck, Grid3x3, Zap, Plus, Trash2, Download,
-  Send, Phone, Mail, MapPin, Calendar, Hash, ChevronDown
+  Send, Phone, Mail, MapPin, ChevronDown
 } from "lucide-react";
 
 const SERVICE_OPTIONS = [
@@ -14,15 +14,44 @@ const SERVICE_OPTIONS = [
   { name: "Electric Fence Installation", icon: Zap, color: "#35D399" },
 ];
 
-const VAT_RATE = 0.16;
-let idSeed = 3;
-
-const initialItems = [
-  { id: 1, service: "CCTV Installation", desc: "4-channel CCTV kit, night-vision cameras, installation & cabling", qty: 1, price: 45000 },
-  { id: 2, service: "Electric Fence Installation", desc: "Perimeter electric fencing, 120m, energizer unit included", qty: 1, price: 68000 },
+const COMMON_MATERIALS = [
+  "6MP smart hybrid cameras",
+  "16 port PoE switch",
+  "UTP cable",
+  "Adapter box",
+  "HDD Surveillance",
+  "1\" Conduit pipe",
+  "3/4\" Conduit pipe",
+  "Surge Protector",
+  "Installation Labor"
 ];
 
-function money(n) {
+const VAT_RATE = 0.16;
+let idSeed = 100; // for new unique IDs
+
+const initialItems = [
+  {
+    id: 1,
+    service: "CCTV Installation",
+    materials: [
+      { id: 10, name: "4-Channel DVR System", qty: 1, price: 12000 },
+      { id: 11, name: "HD Night-Vision Cameras", qty: 4, price: 4500 },
+      { id: 12, name: "RG59 Coaxial Cable (Roll)", qty: 1, price: 6500 },
+      { id: 13, name: "Installation Labor", qty: 1, price: 8500 }
+    ]
+  },
+  {
+    id: 2,
+    service: "Electric Fence Installation",
+    materials: [
+      { id: 20, name: "Energizer Unit 8 Joule", qty: 1, price: 28000 },
+      { id: 21, name: "High Tensile Wire (m)", qty: 120, price: 50 },
+      { id: 22, name: "Installation Labor", qty: 1, price: 15000 }
+    ]
+  },
+];
+
+function money(n: number) {
   return "KES " + n.toLocaleString("en-KE", { minimumFractionDigits: 0 });
 }
 
@@ -38,7 +67,7 @@ export default function ChibuQuote() {
   const [validUntil] = useState("03 Sep 2026");
   const [items, setItems] = useState(initialItems);
   const [notes, setNotes] = useState("50% deposit on acceptance, balance due on completion. Quote valid for 14 days. 12-month warranty on installation workmanship.");
-  const [openMenu, setOpenMenu] = useState(null);
+  const [openMenu, setOpenMenu] = useState<number | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -49,7 +78,7 @@ export default function ChibuQuote() {
     try {
       const element = printRef.current;
       const canvas = await html2canvas(element, {
-        scale: 2, // higher resolution
+        scale: 2,
         useCORS: true,
         backgroundColor: "#F7F3EC"
       });
@@ -69,22 +98,63 @@ export default function ChibuQuote() {
     }
   };
 
-  const addItem = () => {
+  const addService = () => {
     idSeed += 1;
-    setItems([...items, { id: idSeed, service: "CCTV Installation", desc: "", qty: 1, price: 0 }]);
+    setItems([...items, { id: idSeed, service: "CCTV Installation", materials: [{ id: idSeed + 1000, name: "", qty: 1, price: 0 }] }]);
   };
-  const removeItem = (id) => setItems(items.filter((it) => it.id !== id));
-  const updateItem = (id, field, value) =>
-    setItems(items.map((it) => (it.id === id ? { ...it, [field]: value } : it)));
 
-  const subtotal = items.reduce((sum, it) => sum + (Number(it.qty) || 0) * (Number(it.price) || 0), 0);
+  const removeService = (id: number) => setItems(items.filter((it) => it.id !== id));
+  
+  const updateServiceType = (id: number, newService: string) =>
+    setItems(items.map((it) => (it.id === id ? { ...it, service: newService } : it)));
+
+  const addMaterial = (serviceId: number) => {
+    idSeed += 1;
+    setItems(items.map((it) => {
+      if (it.id === serviceId) {
+        return { ...it, materials: [...it.materials, { id: idSeed, name: "", qty: 1, price: 0 }] };
+      }
+      return it;
+    }));
+  };
+
+  const removeMaterial = (serviceId: number, matId: number) => {
+    setItems(items.map((it) => {
+      if (it.id === serviceId) {
+        return { ...it, materials: it.materials.filter(m => m.id !== matId) };
+      }
+      return it;
+    }));
+  };
+
+  const updateMaterial = (serviceId: number, matId: number, field: string, value: string | number) => {
+    setItems(items.map((it) => {
+      if (it.id === serviceId) {
+        return {
+          ...it,
+          materials: it.materials.map(m => (m.id === matId ? { ...m, [field]: value } : m))
+        };
+      }
+      return it;
+    }));
+  };
+
+  // Calculate totals
+  const subtotal = items.reduce((sum, service) => {
+    const serviceTotal = service.materials.reduce((mSum, m) => mSum + (Number(m.qty) || 0) * (Number(m.price) || 0), 0);
+    return sum + serviceTotal;
+  }, 0);
+  
   const vat = subtotal * VAT_RATE;
   const total = subtotal + vat;
 
-  const serviceMeta = (name) => SERVICE_OPTIONS.find((s) => s.name === name) || SERVICE_OPTIONS[0];
+  const serviceMeta = (name: string) => SERVICE_OPTIONS.find((s) => s.name === name) || SERVICE_OPTIONS[0];
 
   return (
     <div className="quote-app-wrapper">
+      <datalist id="common-materials">
+        {COMMON_MATERIALS.map(m => <option key={m} value={m} />)}
+      </datalist>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:wght@500;600&display=swap');
 
@@ -126,8 +196,8 @@ export default function ChibuQuote() {
         .field input:focus, .field textarea:focus { border-color: var(--amber); }
         .divider { height: 1px; background: var(--border); margin: 18px 0; }
 
-        .item-row { background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 12px; margin-bottom: 10px; }
-        .item-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+        .service-block { background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 14px; margin-bottom: 12px; }
+        .service-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
         .service-select { position: relative; }
         .service-pill {
           display: flex; align-items: center; gap: 7px; padding: 6px 10px; border-radius: 999px;
@@ -141,10 +211,18 @@ export default function ChibuQuote() {
         .service-dropdown-item:hover { background: var(--panel-2); }
         .trash-btn { color: var(--dim); cursor: pointer; padding: 4px; border-radius: 6px; }
         .trash-btn:hover { color: #FF7A59; background: rgba(255,122,89,0.1); }
-        .desc-input { width: 100%; margin-bottom: 9px; }
-        .qty-price-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 1fr; gap: 8px; }
-        .qty-price-row .field label { font-size: 10px; }
-        .line-total { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; align-self: flex-end; padding-bottom: 9px; color: var(--amber); }
+        
+        /* Material rows */
+        .mat-row { display: grid; grid-template-columns: 2fr 0.8fr 1fr 1fr auto; gap: 8px; align-items: end; margin-bottom: 8px; }
+        .mat-row .field label { font-size: 9.5px; }
+        .line-total { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; padding-bottom: 10px; color: var(--amber); text-align: right; }
+        
+        .add-mat-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: var(--dim); cursor: pointer; margin-top: 6px; padding: 4px 8px; border-radius: 6px; }
+        .add-mat-btn:hover { color: var(--text); background: var(--panel); }
+
+        .service-summary { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
+        .service-total-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+        .service-total-val { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; color: var(--text); }
 
         .add-item-btn {
           display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%;
@@ -182,9 +260,14 @@ export default function ChibuQuote() {
           color: #8C8375; font-weight: 600; padding-bottom: 8px; border-bottom: 1.5px solid #23201B;
         }
         .paper-table th.num, .paper-table td.num { text-align: right; }
-        .paper-table td { padding: 10px 0; border-bottom: 1px solid #D8D0C0; font-size: 12.5px; vertical-align: top; }
-        .paper-item-service { display: flex; align-items: center; gap: 6px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
+        .paper-table td { padding: 8px 0; border-bottom: 1px solid #D8D0C0; font-size: 12.5px; vertical-align: middle; }
+        
+        .paper-service-row { border-bottom: none !important; }
+        .paper-service-row td { padding-top: 16px; padding-bottom: 4px; border-bottom: none; }
+        .paper-item-service { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
         .paper-item-service .sw { width: 7px; height: 7px; border-radius: 2px; }
+        
+        .paper-mat-row td { color: #4A443B; font-size: 11.5px; }
         .paper-table td.mono, .paper-totals .mono { font-family: 'IBM Plex Mono', monospace; }
 
         .paper-totals { margin-left: auto; width: 230px; margin-top: 14px; font-size: 12.5px; }
@@ -197,11 +280,12 @@ export default function ChibuQuote() {
 
         @media (max-width: 980px) {
           .layout { grid-template-columns: minmax(0, 1fr); }
-          .field-row, .qty-price-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+          .field-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+          .mat-row { grid-template-columns: 1fr 1fr; align-items: start; }
+          .mat-row .line-total { display: none; }
         }
         @media (max-width: 560px) {
           .field-row { grid-template-columns: minmax(0, 1fr); }
-          .qty-price-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
           .paper { padding: 22px 18px; }
           .paper-head { flex-direction: column; gap: 12px; }
           .paper-meta { text-align: left; }
@@ -250,18 +334,21 @@ export default function ChibuQuote() {
 
           <div className="divider" />
 
-          <div className="block-label">Line Items</div>
-          {items.map((it) => {
-            const meta = serviceMeta(it.service);
+          <div className="block-label">Services &amp; Materials</div>
+          {items.map((serviceBlock) => {
+            const meta = serviceMeta(serviceBlock.service);
             const Icon = meta.icon;
+            
+            const serviceTotal = serviceBlock.materials.reduce((sum, m) => sum + (Number(m.qty) || 0) * (Number(m.price) || 0), 0);
+            
             return (
-              <div className="item-row" key={it.id}>
-                <div className="item-top">
+              <div className="service-block" key={serviceBlock.id}>
+                <div className="service-top">
                   <div className="service-select">
-                    <div className="service-pill" style={{ color: meta.color }} onClick={() => setOpenMenu(openMenu === it.id ? null : it.id)}>
-                      <Icon size={13} /> {it.service} <ChevronDown size={12} />
+                    <div className="service-pill" style={{ color: meta.color }} onClick={() => setOpenMenu(openMenu === serviceBlock.id ? null : serviceBlock.id)}>
+                      <Icon size={13} /> {serviceBlock.service} <ChevronDown size={12} />
                     </div>
-                    {openMenu === it.id && (
+                    {openMenu === serviceBlock.id && (
                       <div className="service-dropdown">
                         {SERVICE_OPTIONS.map((s) => {
                           const SIcon = s.icon;
@@ -270,7 +357,7 @@ export default function ChibuQuote() {
                               key={s.name}
                               className="service-dropdown-item"
                               style={{ color: s.color }}
-                              onClick={() => { updateItem(it.id, "service", s.name); setOpenMenu(null); }}
+                              onClick={() => { updateServiceType(serviceBlock.id, s.name); setOpenMenu(null); }}
                             >
                               <SIcon size={13} /> {s.name}
                             </div>
@@ -279,32 +366,45 @@ export default function ChibuQuote() {
                       </div>
                     )}
                   </div>
-                  <div className="trash-btn" onClick={() => removeItem(it.id)}><Trash2 size={15} /></div>
+                  <div className="trash-btn" onClick={() => removeService(serviceBlock.id)}><Trash2 size={15} /></div>
                 </div>
 
-                <div className="field desc-input">
-                  <input
-                    placeholder="Describe the work / materials included"
-                    value={it.desc}
-                    onChange={(e) => updateItem(it.id, "desc", e.target.value)}
-                  />
+                {serviceBlock.materials.map((mat, i) => (
+                  <div className="mat-row" key={mat.id}>
+                    <div className="field">
+                      {i === 0 && <label>Material / Description</label>}
+                      <input
+                        list="common-materials"
+                        placeholder="e.g. 4-Channel DVR"
+                        value={mat.name}
+                        onChange={(e) => updateMaterial(serviceBlock.id, mat.id, "name", e.target.value)}
+                      />
+                    </div>
+                    <div className="field">
+                      {i === 0 && <label>Qty</label>}
+                      <input type="number" min="0" value={mat.qty} onChange={(e) => updateMaterial(serviceBlock.id, mat.id, "qty", e.target.value)} />
+                    </div>
+                    <div className="field">
+                      {i === 0 && <label>Price (KES)</label>}
+                      <input type="number" min="0" value={mat.price} onChange={(e) => updateMaterial(serviceBlock.id, mat.id, "price", e.target.value)} />
+                    </div>
+                    <div className="line-total">{money((Number(mat.qty) || 0) * (Number(mat.price) || 0))}</div>
+                    <div className="trash-btn" style={{ paddingBottom: 10 }} onClick={() => removeMaterial(serviceBlock.id, mat.id)}><Trash2 size={14} /></div>
+                  </div>
+                ))}
+                
+                <div className="add-mat-btn" onClick={() => addMaterial(serviceBlock.id)}>
+                  <Plus size={13} /> Add Material
                 </div>
 
-                <div className="qty-price-row">
-                  <div className="field">
-                    <label>Qty</label>
-                    <input type="number" min="0" value={it.qty} onChange={(e) => updateItem(it.id, "qty", e.target.value)} />
-                  </div>
-                  <div className="field">
-                    <label>Unit price (KES)</label>
-                    <input type="number" min="0" value={it.price} onChange={(e) => updateItem(it.id, "price", e.target.value)} />
-                  </div>
-                  <div className="line-total">{money((Number(it.qty) || 0) * (Number(it.price) || 0))}</div>
+                <div className="service-summary">
+                  <div className="service-total-label">Service Subtotal</div>
+                  <div className="service-total-val">{money(serviceTotal)}</div>
                 </div>
               </div>
             );
           })}
-          <div className="add-item-btn" onClick={addItem}><Plus size={15} /> Add line item</div>
+          <div className="add-item-btn" onClick={addService}><Plus size={15} /> Add Service</div>
 
           <div className="divider" />
 
@@ -365,20 +465,28 @@ export default function ChibuQuote() {
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((it) => {
-                    const meta = serviceMeta(it.service);
+                  {items.map((serviceBlock) => {
+                    const meta = serviceMeta(serviceBlock.service);
                     return (
-                      <tr key={it.id}>
-                        <td>
-                          <div className="paper-item-service" style={{ color: meta.color }}>
-                            <span className="sw" style={{ background: meta.color }} /> {it.service}
-                          </div>
-                          {it.desc || "—"}
-                        </td>
-                        <td className="num mono">{it.qty}</td>
-                        <td className="num mono">{money(Number(it.price) || 0)}</td>
-                        <td className="num mono">{money((Number(it.qty) || 0) * (Number(it.price) || 0))}</td>
-                      </tr>
+                      <React.Fragment key={serviceBlock.id}>
+                        {/* Service Header Row */}
+                        <tr className="paper-service-row">
+                          <td colSpan={4}>
+                            <div className="paper-item-service" style={{ color: meta.color }}>
+                              <span className="sw" style={{ background: meta.color }} /> {serviceBlock.service}
+                            </div>
+                          </td>
+                        </tr>
+                        {/* Material Rows */}
+                        {serviceBlock.materials.map((mat) => (
+                          <tr className="paper-mat-row" key={mat.id}>
+                            <td style={{ paddingLeft: 14 }}>{mat.name || "—"}</td>
+                            <td className="num mono">{mat.qty}</td>
+                            <td className="num mono">{money(Number(mat.price) || 0)}</td>
+                            <td className="num mono">{money((Number(mat.qty) || 0) * (Number(mat.price) || 0))}</td>
+                          </tr>
+                        ))}
+                      </React.Fragment>
                     );
                   })}
                 </tbody>
@@ -403,3 +511,4 @@ export default function ChibuQuote() {
     </div>
   );
 }
+
