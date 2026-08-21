@@ -11,6 +11,7 @@ import ChibuQuote from "./components/ChibuQuote";
 import InvoicesView from "./components/ChibuInvoices";
 import InvoiceDetailView from "./components/InvoiceDetailView";
 import ChibuPayments from "./components/ChibuPayments";
+import ChibuPerformance from "./components/ChibuPerformance";
 
 const navItems = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
@@ -268,7 +269,7 @@ function AppLayout() {
           <Route path="/invoices" element={<InvoicesView />} />
           <Route path="/invoices/:id" element={<InvoiceDetailView />} />
           <Route path="/payments" element={<ChibuPayments />} />
-          <Route path="/performance" element={<div className="panel-block"><h1 className="text-xl font-bold">Performance</h1><p className="text-sm mt-2 text-[#8A97A5]">Performance analytics coming soon...</p></div>} />
+          <Route path="/performance" element={<ChibuPerformance />} />
           <Route path="/settings" element={<div className="panel-block"><h1 className="text-xl font-bold">Settings</h1><p className="text-sm mt-2 text-[#8A97A5]">System configuration coming soon...</p></div>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
