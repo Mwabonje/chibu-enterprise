@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import {
   Camera, Sun, ShieldCheck, Grid3x3, Zap, Search, Phone, Mail, MapPin,
   Crown, Calendar, Wallet, Briefcase, CheckCircle2, Clock, FileText,
-  Banknote, UserPlus, PhoneCall
+  Banknote, UserPlus, PhoneCall, ArrowUp, ArrowDown
 } from "lucide-react";
 
 const SERVICE_META = {
@@ -117,15 +117,50 @@ export default function ChibuClients() {
   const [tab, setTab] = useState("All");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(clients[0].id);
+  const [sortConfig, setSortConfig] = useState<{key: string, direction: 'asc' | 'desc'} | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
-    return clients.filter((c) => {
+    let res = clients.filter((c) => {
       const matchesTab = tab === "All" || c.status === tab;
       const matchesQuery = !q || c.name.toLowerCase().includes(q) || c.location.toLowerCase().includes(q);
       return matchesTab && matchesQuery;
-    }).sort((a, b) => b.lifetime - a.lifetime);
-  }, [tab, query]);
+    });
+
+    if (sortConfig !== null) {
+      res.sort((a, b) => {
+        if (sortConfig.key === 'name') {
+          return sortConfig.direction === 'asc' 
+            ? a.name.localeCompare(b.name) 
+            : b.name.localeCompare(a.name);
+        } else if (sortConfig.key === 'date') {
+          const dateA = new Date(a.since).getTime();
+          const dateB = new Date(b.since).getTime();
+          return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
+        }
+        return 0;
+      });
+    } else {
+      res.sort((a, b) => b.lifetime - a.lifetime);
+    }
+    return res;
+  }, [tab, query, sortConfig]);
+
+  const handleSort = (key: string) => {
+    setSortConfig(prev => {
+      if (prev && prev.key === key) {
+        return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, direction: 'asc' };
+    });
+  };
+
+  const SortIcon = ({ columnKey }: { columnKey: string }) => {
+    if (!sortConfig || sortConfig.key !== columnKey) {
+      return <ArrowDown size={12} style={{ opacity: 0.3 }} />;
+    }
+    return sortConfig.direction === 'asc' ? <ArrowUp size={12} color="var(--text)" /> : <ArrowDown size={12} color="var(--text)" />;
+  };
 
   const selected = clients.find((c) => c.id === selectedId) || filtered[0];
 
@@ -159,7 +194,7 @@ export default function ChibuClients() {
         .stat-label { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.08em; }
         .stat-value { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; margin-top: 7px; }
 
-        .layout { display: grid; grid-template-columns: 1fr 1.35fr; gap: 16px; align-items: start; }
+        .layout { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
 
         /* ---- LIST ---- */
         .list-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
@@ -169,18 +204,24 @@ export default function ChibuClients() {
         .tab-btn { font-size: 11.5px; font-weight: 600; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--border); color: var(--dim); cursor: pointer; background: transparent; }
         .tab-btn.active { background: var(--panel-2); color: var(--text); border-color: var(--amber); }
 
-        .client-row { display: flex; align-items: center; gap: 12px; padding: 12px 10px; border-radius: 9px; cursor: pointer; border: 1px solid transparent; margin-bottom: 4px; }
-        .client-row:hover { background: var(--panel-2); }
+        .list-header { display: grid; grid-template-columns: 2fr 1.5fr 1.2fr 1fr auto; gap: 16px; align-items: center; padding: 0 16px 12px 16px; border-bottom: 1px solid var(--border); margin-bottom: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--dim); letter-spacing: 0.05em; }
+        .sortable-col { display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
+        .sortable-col:hover { color: var(--text); }
+
+        .client-row { display: grid; grid-template-columns: 2fr 1.5fr 1.2fr 1fr auto; gap: 16px; align-items: center; padding: 16px; border-radius: 9px; cursor: pointer; border: 1px solid var(--border); margin-bottom: 8px; }
+        .client-row:hover { background: var(--panel-2); border-color: var(--amber); }
         .client-row.selected { background: var(--panel-2); border-color: var(--amber); }
-        .avatar { width: 38px; height: 38px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700; flex-shrink: 0; }
-        .client-mid { flex: 1; min-width: 0; }
-        .client-name { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-        .client-meta { font-size: 11px; color: var(--dim); margin-top: 2px; display: flex; gap: 5px; align-items: center; }
-        .client-right { text-align: right; }
-        .client-spend { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-weight: 600; }
-        .client-balance { font-size: 10.5px; color: var(--amber); margin-top: 3px; }
-        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 600; margin-top: 4px; }
-        .empty-state { text-align: center; padding: 30px 10px; color: var(--dim); font-size: 13px; }
+        .client-col { display: flex; flex-direction: column; gap: 4px; }
+        
+        .avatar { width: 42px; height: 42px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+        
+        .client-name-group { display: flex; align-items: center; gap: 12px; }
+        .client-name { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+        .client-meta { font-size: 12px; color: var(--dim); display: flex; gap: 6px; align-items: center; }
+        .client-spend { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; }
+        .client-balance { font-size: 11px; color: var(--amber); font-weight: 500; }
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+        .empty-state { text-align: center; padding: 40px 10px; color: var(--dim); font-size: 14px; }
 
         /* ---- DETAIL ---- */
         .detail-panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
@@ -220,11 +261,14 @@ export default function ChibuClients() {
         .hist-date { font-size: 10.5px; color: var(--dim); margin-top: 2px; }
 
         @media (max-width: 980px) {
-          .layout { grid-template-columns: 1fr; }
           .stat-grid { grid-template-columns: 1fr 1fr; }
-          .mini-stats { grid-template-columns: 1fr 1fr; }
-          .contact-block { text-align: left; }
-          .contact-line { justify-content: flex-start; }
+        }
+        
+        @media (max-width: 768px) {
+          .list-header { display: none; }
+          .client-row { grid-template-columns: 1fr; gap: 12px; }
+          .client-col { align-items: flex-start; }
+          .client-row > div:last-child { text-align: left; }
         }
       `}</style>
 
@@ -278,6 +322,18 @@ export default function ChibuClients() {
 
           {filtered.length === 0 && <div className="empty-state">No clients match this filter.</div>}
 
+          <div className="list-header">
+            <div className="sortable-col" onClick={() => handleSort('name')}>
+              Client Name <SortIcon columnKey="name" />
+            </div>
+            <div>Contact Info</div>
+            <div className="sortable-col" onClick={() => handleSort('date')}>
+              Info &amp; Date <SortIcon columnKey="date" />
+            </div>
+            <div>Financials</div>
+            <div style={{ textAlign: "right" }}>Status</div>
+          </div>
+
           {filtered.map((c) => {
             const sMeta = STATUS_META[c.status as keyof typeof STATUS_META];
             return (
@@ -286,105 +342,51 @@ export default function ChibuClients() {
                 className={`client-row ${selected && selected.id === c.id ? "selected" : ""}`}
                 onClick={() => setSelectedId(c.id)}
               >
-                <div className="avatar">{initials(c.name)}</div>
-                <div className="client-mid">
-                  <div className="client-name">{c.name}{c.vip && <Crown size={12} color="#FFB020" />}</div>
-                  <div className="client-meta"><MapPin size={10} /> {c.location}</div>
+                <div className="client-name-group">
+                  <div className="avatar">{initials(c.name)}</div>
+                  <div className="client-col">
+                    <div className="client-name">
+                      {c.name}
+                      {c.vip && <Crown size={12} color="#FFB020" />}
+                    </div>
+                    <div className="client-meta">
+                      <MapPin size={12} /> {c.location}
+                    </div>
+                  </div>
                 </div>
-                <div className="client-right">
+                
+                <div className="client-col">
+                  <div className="client-meta" style={{ color: "var(--text)" }}>
+                    <Phone size={12} /> {c.phone}
+                  </div>
+                  <div className="client-meta">
+                    <Mail size={12} /> {c.email}
+                  </div>
+                </div>
+
+                <div className="client-col">
+                  <div style={{ fontSize: 13, fontWeight: 500 }}>{c.type}</div>
+                  <div className="client-meta">Client since {c.since}</div>
+                </div>
+
+                <div className="client-col">
                   <div className="client-spend">{money(c.lifetime)}</div>
-                  <div className="badge" style={{ color: sMeta.color, background: sMeta.bg }}>{c.status}</div>
-                  {c.outstanding > 0 && <div className="client-balance">Due {money(c.outstanding)}</div>}
+                  {c.outstanding > 0 ? (
+                    <div className="client-balance">Due {money(c.outstanding)}</div>
+                  ) : (
+                    <div className="client-meta" style={{ color: "var(--green)" }}>Settled</div>
+                  )}
+                </div>
+
+                <div style={{ textAlign: "right" }}>
+                  <div className="badge" style={{ color: sMeta.color, background: sMeta.bg }}>
+                    {c.status}
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
-
-        {/* DETAIL */}
-        {selected && (
-          <div className="detail-panel">
-            <div className="detail-head">
-              <div className="detail-id">
-                <div className="avatar-lg">{initials(selected.name)}</div>
-                <div>
-                  <div className="detail-name-row">
-                    <div className="detail-name">{selected.name}</div>
-                  </div>
-                  <div className="detail-tags">
-                    <span className="tag" style={{ color: STATUS_META[selected.status as keyof typeof STATUS_META].color, borderColor: STATUS_META[selected.status as keyof typeof STATUS_META].color + "55" }}>{selected.status}</span>
-                    <span className="tag">{selected.type}</span>
-                    {selected.vip && <span className="tag vip-tag"><Crown size={11} /> VIP Client</span>}
-                  </div>
-                </div>
-              </div>
-              <div className="contact-block">
-                <div className="contact-line"><Phone size={12} /> {selected.phone}</div>
-                <div className="contact-line"><Mail size={12} /> {selected.email}</div>
-                <div className="contact-line"><MapPin size={12} /> {selected.location}</div>
-              </div>
-            </div>
-
-            <div className="mini-stats">
-              <div className="mini-stat">
-                <div className="mini-stat-label"><Wallet size={11} /> Lifetime Value</div>
-                <div className="mini-stat-value">{money(selected.lifetime)}</div>
-              </div>
-              <div className="mini-stat">
-                <div className="mini-stat-label"><Clock size={11} /> Outstanding</div>
-                <div className="mini-stat-value" style={{ color: selected.outstanding > 0 ? "#FFB020" : "#35D399" }}>
-                  {selected.outstanding > 0 ? money(selected.outstanding) : "Settled"}
-                </div>
-              </div>
-              <div className="mini-stat">
-                <div className="mini-stat-label"><Briefcase size={11} /> Jobs</div>
-                <div className="mini-stat-value">{selected.jobs}</div>
-              </div>
-              <div className="mini-stat">
-                <div className="mini-stat-label"><Calendar size={11} /> Client Since</div>
-                <div className="mini-stat-value" style={{ fontSize: 13 }}>{selected.since}</div>
-              </div>
-            </div>
-
-            <div className="quick-actions">
-              <div className="quick-btn"><FileText size={14} /> New Quote</div>
-              <div className="quick-btn"><Banknote size={14} /> Log Payment</div>
-              <div className="quick-btn"><PhoneCall size={14} /> Call</div>
-              <div className="quick-btn"><Mail size={14} /> Email</div>
-            </div>
-
-            <div className="notes-box">
-              <div className="notes-label">Notes</div>
-              {selected.notes}
-            </div>
-
-            <div className="section-title">Service History</div>
-            {selected.history.map((h, i) => {
-              const meta = SERVICE_META[h.service as keyof typeof SERVICE_META];
-              const Icon = meta.icon;
-              const hMeta = HISTORY_STATUS[h.status as keyof typeof HISTORY_STATUS];
-              const HIcon = hMeta.icon;
-              return (
-                <div className="hist-row" key={i}>
-                  <div className="hist-icon" style={{ background: meta.color + "20" }}>
-                    <Icon size={15} color={meta.color} />
-                  </div>
-                  <div className="hist-mid">
-                    <div className="hist-service">{h.service}</div>
-                    <div className="hist-desc">{h.desc}</div>
-                  </div>
-                  <div className="hist-right">
-                    <div className="hist-amount">{money(h.amount)}</div>
-                    <div className="hist-date">{h.date}</div>
-                    <span className="badge" style={{ color: hMeta.color, background: hMeta.bg, marginTop: 4 }}>
-                      <HIcon size={10} /> {h.status}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
   );

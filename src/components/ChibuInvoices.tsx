@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import {
   Camera, Sun, ShieldCheck, Grid3x3, Zap, Search, Download, Send,
-  CheckCircle2, Clock, AlertTriangle, FileEdit, MapPin, Banknote
+  CheckCircle2, Clock, AlertTriangle, FileEdit, MapPin, Banknote, ArrowUp, ArrowDown
 } from "lucide-react";
 
 const SERVICE_META = {
@@ -70,18 +70,52 @@ export default function ChibuInvoices() {
   const [tab, setTab] = useState("All");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(invoices[0].id);
-  const [statusOverride, setStatusOverride] = useState({});
+  const [statusOverride, setStatusOverride] = useState<Record<number, string>>({});
+  const [sortConfig, setSortConfig] = useState<{key: string, direction: 'asc' | 'desc'} | null>(null);
 
   const list = invoices.map((inv) => ({ ...inv, status: statusOverride[inv.id] || inv.status }));
 
   const filtered = useMemo(() => {
-    return list.filter((inv) => {
+    let res = list.filter((inv) => {
       const matchesTab = tab === "All" || inv.status === tab;
       const q = query.toLowerCase();
       const matchesQuery = !q || inv.client.toLowerCase().includes(q) || inv.no.toLowerCase().includes(q);
       return matchesTab && matchesQuery;
     });
-  }, [tab, query, list]);
+
+    if (sortConfig !== null) {
+      res.sort((a, b) => {
+        if (sortConfig.key === 'client') {
+          return sortConfig.direction === 'asc' 
+            ? a.client.localeCompare(b.client) 
+            : b.client.localeCompare(a.client);
+        } else if (sortConfig.key === 'date') {
+          const dateA = new Date(a.issued).getTime();
+          const dateB = new Date(b.issued).getTime();
+          return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
+        }
+        return 0;
+      });
+    }
+
+    return res;
+  }, [tab, query, list, sortConfig]);
+
+  const handleSort = (key: string) => {
+    setSortConfig(prev => {
+      if (prev && prev.key === key) {
+        return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, direction: 'asc' };
+    });
+  };
+
+  const SortIcon = ({ columnKey }: { columnKey: string }) => {
+    if (!sortConfig || sortConfig.key !== columnKey) {
+      return <ArrowDown size={12} style={{ opacity: 0.3 }} />;
+    }
+    return sortConfig.direction === 'asc' ? <ArrowUp size={12} color="var(--text)" /> : <ArrowDown size={12} color="var(--text)" />;
+  };
 
   const selected = list.find((inv) => inv.id === selectedId) || filtered[0];
   const { sub, vat, total } = selected ? invoiceTotal(selected) : { sub: 0, vat: 0, total: 0 };
@@ -127,6 +161,10 @@ export default function ChibuInvoices() {
         .tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
         .tab-btn { font-size: 11.5px; font-weight: 600; padding: 6px 11px; border-radius: 999px; border: 1px solid var(--border); color: var(--dim); cursor: pointer; background: transparent; }
         .tab-btn.active { background: var(--panel-2); color: var(--text); border-color: var(--amber); }
+
+        .inv-list-header { display: flex; align-items: center; padding: 0 10px 12px 10px; border-bottom: 1px solid var(--border); margin-bottom: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; color: var(--dim); letter-spacing: 0.05em; }
+        .sortable-col { display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
+        .sortable-col:hover { color: var(--text); }
 
         .inv-row { display: flex; align-items: center; gap: 12px; padding: 12px 10px; border-radius: 9px; cursor: pointer; border: 1px solid transparent; margin-bottom: 4px; }
         .inv-row:hover { background: var(--panel-2); }
@@ -235,6 +273,15 @@ export default function ChibuInvoices() {
 
           <div style={{ flex: 1, overflowY: "auto", paddingRight: 4, marginRight: -4 }}>
             {filtered.length === 0 && <div className="empty-state">No invoices match this filter.</div>}
+
+            <div className="inv-list-header">
+              <div className="sortable-col" onClick={() => handleSort('client')} style={{ flex: 1, paddingLeft: 46 }}>
+                Client / Invoice <SortIcon columnKey="client" />
+              </div>
+              <div className="sortable-col" style={{ textAlign: "right", justifyContent: "flex-end" }} onClick={() => handleSort('date')}>
+                Amount &amp; Status <SortIcon columnKey="date" />
+              </div>
+            </div>
 
             {filtered.map((inv) => {
               const meta = SERVICE_META[inv.service as keyof typeof SERVICE_META];
