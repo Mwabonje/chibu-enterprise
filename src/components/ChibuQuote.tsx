@@ -3,7 +3,7 @@ import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 import {
   Camera, Sun, ShieldCheck, Grid3x3, Zap, Plus, Trash2, Download,
-  Send, Phone, Mail, MapPin, ChevronDown
+  Send, Phone, Mail, MapPin, ChevronDown, CheckCircle2, AlertTriangle, FileEdit, XCircle
 } from "lucide-react";
 
 const SERVICE_OPTIONS = [
@@ -13,6 +13,13 @@ const SERVICE_OPTIONS = [
   { name: "Window & Staircase Grill", icon: Grid3x3, color: "#9BA8B4" },
   { name: "Electric Fence Installation", icon: Zap, color: "#35D399" },
 ];
+
+const STATUS_META = {
+  "Draft": { color: "#9BA8B4", bg: "rgba(155,168,180,0.13)", icon: FileEdit },
+  "Sent": { color: "#3FC1E0", bg: "rgba(63,193,224,0.13)", icon: Send },
+  "Approved": { color: "#35D399", bg: "rgba(53,211,153,0.13)", icon: CheckCircle2 },
+  "Declined": { color: "#FF7A59", bg: "rgba(255,122,89,0.13)", icon: XCircle },
+};
 
 const COMMON_MATERIALS = [
   "6MP smart hybrid cameras",
@@ -57,6 +64,7 @@ const PAST_QUOTES = [
     client: { name: "David Kimani", phone: "+254 700 111 222", email: "david.k@example.com", location: "Mtwapa, Kilifi" },
     date: "18 Aug 2026",
     validUntil: "01 Sep 2026",
+    status: "Approved",
     items: [
       {
         id: 1,
@@ -75,6 +83,7 @@ const PAST_QUOTES = [
     client: { name: "Fatuma Said", phone: "+254 722 333 444", email: "fatuma.s@example.com", location: "Diani Beach" },
     date: "15 Aug 2026",
     validUntil: "29 Aug 2026",
+    status: "Sent",
     items: [
       {
         id: 1,
@@ -107,6 +116,7 @@ export default function ChibuQuote() {
   const [quoteNo] = useState("QT-2026-0148");
   const [date] = useState("20 Aug 2026");
   const [validUntil] = useState("03 Sep 2026");
+  const [status, setStatus] = useState("Draft");
   const [items, setItems] = useState(initialItems);
   const [notes, setNotes] = useState("50% deposit on acceptance, balance due on completion. Quote valid for 14 days. 12-month warranty on installation workmanship.");
   const [openMenu, setOpenMenu] = useState<number | null>(null);
@@ -189,6 +199,7 @@ export default function ChibuQuote() {
         client: client,
         date: date,
         validUntil: validUntil,
+        status: status,
         items: items,
         notes: notes
       };
@@ -250,6 +261,7 @@ export default function ChibuQuote() {
         .quote-meta { font-size: 11px; color: var(--dim); margin-top: 2px; display: flex; gap: 6px; align-items: center; }
         .quote-right { text-align: right; }
         .quote-amount { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; }
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 600; margin-top: 4px; }
         .empty-state { text-align: center; padding: 30px 10px; color: var(--dim); font-size: 13px; }
 
         /* ---- Builder (dark control panel) ---- */
@@ -258,12 +270,12 @@ export default function ChibuQuote() {
         .field-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-bottom: 10px; }
         .field { display: flex; flex-direction: column; gap: 5px; }
         .field label { font-size: 11px; color: var(--dim); }
-        .field input, .field textarea {
+        .field input, .field textarea, .field select {
           background: var(--panel-2); border: 1px solid var(--border); border-radius: 7px;
           padding: 9px 10px; color: var(--text); font-size: 13px; font-family: 'Inter', sans-serif;
           outline: none; width: 100%; min-width: 0;
         }
-        .field input:focus, .field textarea:focus { border-color: var(--amber); }
+        .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--amber); }
         .divider { height: 1px; background: var(--border); margin: 18px 0; }
 
         .service-block { background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; padding: 14px; margin-bottom: 12px; }
@@ -309,10 +321,14 @@ export default function ChibuQuote() {
         .preview-tag .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 6px; }
 
         .paper {
+          position: relative;
           background: #F7F3EC; color: #23201B; border-radius: 4px; padding: 34px 32px;
           font-family: 'Inter', sans-serif; box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-          flex: 1; display: flex; flex-direction: column;
+          flex: 1; display: flex; flex-direction: column; overflow: hidden;
         }
+        .stamp { position: absolute; top: 92px; right: 40px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 30px; letter-spacing: 0.08em; border: 4px solid; padding: 4px 16px; border-radius: 8px; transform: rotate(-14deg); opacity: 0.85; pointer-events: none; }
+        .stamp.approved { color: #1F9D6B; border-color: #1F9D6B; }
+        .stamp.declined { color: #E24E3C; border-color: #E24E3C; }
 
         .paper-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #23201B; padding-bottom: 16px; margin-bottom: 18px; }
         .paper-brand { display: flex; align-items: center; gap: 10px; }
@@ -408,6 +424,21 @@ export default function ChibuQuote() {
                 <div className="field">
                   <label>Site location</label>
                   <input value={client.location} onChange={(e) => setClient({ ...client, location: e.target.value })} />
+                </div>
+              </div>
+
+              <div className="divider" />
+
+              <div className="block-label">Quotation Details</div>
+              <div className="field-row">
+                <div className="field">
+                  <label>Status</label>
+                  <select value={status} onChange={(e) => setStatus(e.target.value)}>
+                    <option value="Draft">Draft</option>
+                    <option value="Sent">Sent</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Declined">Declined</option>
+                  </select>
                 </div>
               </div>
 
@@ -518,6 +549,11 @@ export default function ChibuQuote() {
                     <div className="quote-right">
                       <div className="quote-amount">{money(Math.round(total))}</div>
                       <div className="quote-meta" style={{ justifyContent: "flex-end", marginTop: 4 }}>{pq.date}</div>
+                      {pq.status && (
+                        <div className="badge" style={{ color: STATUS_META[pq.status as keyof typeof STATUS_META]?.color, background: STATUS_META[pq.status as keyof typeof STATUS_META]?.bg }}>
+                          {React.createElement(STATUS_META[pq.status as keyof typeof STATUS_META]?.icon || FileEdit, { size: 10 })} {pq.status}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -535,6 +571,9 @@ export default function ChibuQuote() {
             A4 &middot; Quotation
           </div>
           <div className="paper" ref={printRef}>
+            {activeQuote.status === "Approved" && <div className="stamp approved">APPROVED</div>}
+            {activeQuote.status === "Declined" && <div className="stamp declined">DECLINED</div>}
+
             <div className="paper-head">
               <div className="paper-brand">
                 <div className="paper-mark">CE</div>
