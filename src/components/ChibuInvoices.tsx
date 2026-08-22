@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from "react";
 import {
   Camera, Sun, ShieldCheck, Grid3x3, Zap, Search, Download, Send,
-  CheckCircle2, Clock, AlertTriangle, FileEdit, MapPin, Banknote, ArrowUp, ArrowDown
+  CheckCircle2, Clock, AlertTriangle, FileEdit, MapPin, Banknote, ArrowUp, ArrowDown, Trash2
 } from "lucide-react";
+import { DeleteModal } from "./DeleteModal";
 
 const SERVICE_META = {
   "CCTV Installation": { icon: Camera, color: "#3FC1E0" },
@@ -67,13 +68,15 @@ function invoiceTotal(inv) {
 }
 
 export default function ChibuInvoices() {
+  const [invoiceList, setInvoiceList] = useState(invoices);
   const [tab, setTab] = useState("All");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(invoices[0].id);
   const [statusOverride, setStatusOverride] = useState<Record<number, string>>({});
   const [sortConfig, setSortConfig] = useState<{key: string, direction: 'asc' | 'desc'} | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const list = invoices.map((inv) => ({ ...inv, status: statusOverride[inv.id] || inv.status }));
+  const list = invoiceList.map((inv) => ({ ...inv, status: statusOverride[inv.id] || inv.status }));
 
   const filtered = useMemo(() => {
     let res = list.filter((inv) => {
@@ -308,6 +311,14 @@ export default function ChibuInvoices() {
                       <SIcon size={10} /> {inv.status}
                     </div>
                   </div>
+                  <div 
+                    onClick={(e) => { e.stopPropagation(); setDeletingId(inv.id); }}
+                    style={{ color: "var(--dim)", cursor: "pointer", display: "flex", padding: "4px" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#E24E3C")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "var(--dim)")}
+                  >
+                    <Trash2 size={16} />
+                  </div>
                 </div>
               );
             })}
@@ -419,6 +430,16 @@ export default function ChibuInvoices() {
           </div>
         )}
       </div>
+      <DeleteModal 
+        isOpen={deletingId !== null}
+        title="Delete Invoice"
+        message="Are you sure you want to delete this invoice? This action cannot be undone."
+        onCancel={() => setDeletingId(null)}
+        onConfirm={() => {
+          setInvoiceList(prev => prev.filter(i => i.id !== deletingId));
+          setDeletingId(null);
+        }}
+      />
     </div>
   );
 }

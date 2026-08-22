@@ -2,8 +2,9 @@ import React, { useState, useMemo } from "react";
 import {
   Camera, Sun, ShieldCheck, Grid3x3, Zap, Search, Phone, Mail, MapPin,
   Crown, Calendar, Wallet, Briefcase, CheckCircle2, Clock, FileText,
-  Banknote, UserPlus, PhoneCall, ArrowUp, ArrowDown
+  Banknote, UserPlus, PhoneCall, ArrowUp, ArrowDown, Trash2
 } from "lucide-react";
+import { DeleteModal } from "./DeleteModal";
 
 const SERVICE_META = {
   "CCTV Installation": { icon: Camera, color: "#3FC1E0" },
@@ -114,14 +115,16 @@ const HISTORY_STATUS = {
 };
 
 export default function ChibuClients() {
+  const [clientList, setClientList] = useState(clients);
   const [tab, setTab] = useState("All");
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(clients[0].id);
   const [sortConfig, setSortConfig] = useState<{key: string, direction: 'asc' | 'desc'} | null>(null);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
-    let res = clients.filter((c) => {
+    let res = clientList.filter((c) => {
       const matchesTab = tab === "All" || c.status === tab;
       const matchesQuery = !q || c.name.toLowerCase().includes(q) || c.location.toLowerCase().includes(q);
       return matchesTab && matchesQuery;
@@ -162,14 +165,14 @@ export default function ChibuClients() {
     return sortConfig.direction === 'asc' ? <ArrowUp size={12} color="var(--text)" /> : <ArrowDown size={12} color="var(--text)" />;
   };
 
-  const selected = clients.find((c) => c.id === selectedId) || filtered[0];
+  const selected = clientList.find((c) => c.id === selectedId) || filtered[0];
 
   const totals = useMemo(() => {
-    const active = clients.filter((c) => c.status === "Active").length;
-    const lifetimeValue = clients.reduce((s, c) => s + c.lifetime, 0);
-    const outstanding = clients.reduce((s, c) => s + c.outstanding, 0);
-    return { total: clients.length, active, lifetimeValue, outstanding };
-  }, []);
+    const active = clientList.filter((c) => c.status === "Active").length;
+    const lifetimeValue = clientList.reduce((s, c) => s + c.lifetime, 0);
+    const outstanding = clientList.reduce((s, c) => s + c.outstanding, 0);
+    return { total: clientList.length, active, lifetimeValue, outstanding };
+  }, [clientList]);
 
   return (
     <div>
@@ -275,7 +278,7 @@ export default function ChibuClients() {
       <div className="page-head">
         <div>
           <div className="page-title">Clients</div>
-          <div className="page-sub">{totals.total} clients &middot; {totals.active} active &middot; {clients.filter(c => c.status === "Lead").length} leads</div>
+          <div className="page-sub">{totals.total} clients &middot; {totals.active} active &middot; {clientList.filter(c => c.status === "Lead").length} leads</div>
         </div>
         <button className="btn btn-primary"><UserPlus size={15} /> New Client</button>
       </div>
@@ -378,9 +381,17 @@ export default function ChibuClients() {
                   )}
                 </div>
 
-                <div style={{ textAlign: "right" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "16px" }}>
                   <div className="badge" style={{ color: sMeta.color, background: sMeta.bg }}>
                     {c.status}
+                  </div>
+                  <div 
+                    onClick={(e) => { e.stopPropagation(); setDeletingId(c.id); }}
+                    style={{ color: "var(--dim)", cursor: "pointer", display: "flex", padding: "4px" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "#E24E3C")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "var(--dim)")}
+                  >
+                    <Trash2 size={16} />
                   </div>
                 </div>
               </div>
@@ -388,6 +399,17 @@ export default function ChibuClients() {
           })}
         </div>
       </div>
+      
+      <DeleteModal 
+        isOpen={deletingId !== null}
+        title="Delete Client"
+        message="Are you sure you want to delete this client? This action cannot be undone and all associated data will be lost."
+        onCancel={() => setDeletingId(null)}
+        onConfirm={() => {
+          setClientList(prev => prev.filter(c => c.id !== deletingId));
+          setDeletingId(null);
+        }}
+      />
     </div>
   );
 }
